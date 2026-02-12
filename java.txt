@@ -1,0 +1,3958 @@
+    import java.applet.Applet;
+import java.awt.Choice;
+import java.awt.Color;
+import java.awt.Event;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.LayoutManager;
+import java.awt.List;
+import java.awt.MediaTracker;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.image.CropImageFilter;
+import java.awt.image.FilteredImageSource;
+import java.awt.image.ImageProducer;
+import java.io.DataInputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+import java.util.Enumeration;
+import java.util.StringTokenizer;
+import java.util.Vector;
+import sun.audio.AudioData;
+import sun.audio.AudioDataStream;
+import sun.audio.AudioPlayer;
+
+public class RoboBug extends Applet implements Runnable {
+   Font loadFont;
+   FontMetrics loadFontMet;
+   Font titleFont;
+   FontMetrics titleFontMet;
+   Font scrollFont;
+   FontMetrics scrollFontMet;
+   Font regFont;
+   FontMetrics regFontMet;
+   Font regBoldFont;
+   FontMetrics regBoldFontMet;
+   static int WIDTH = 448;
+   static int HEIGHT = 256;
+   static final int LOADING = 0;
+   static final int OPTIONS = 1;
+   static final int PLAYING = 2;
+   static final int HELP = 3;
+   static final int STARTSCREEN = 5;
+   static final int INTRO = 6;
+   static final int GAMEOVER = 7;
+   static final int INTROLEVEL = 8;
+   static final int LOADLEVEL = 9;
+   static final int SAVE = 10;
+   static final int RESTORE = 11;
+   static final int CREDITS = 12;
+   static final int MAP = 13;
+   static final int ERROR = 14;
+   static final int INITIALIZING = 15;
+   static final int HIGHSCORE = 16;
+   static final int GETLEVEL = 17;
+   static final int WINGAME = 18;
+   int state = 15;
+   int prevstate = 15;
+   static final int MAXSTARS = 200;
+   static final int MAXFRIENDS = 64;
+   int winticks;
+   Point[] starfield;
+   int[] friends;
+   public static final int NAME_WIDTH = 15;
+   public static final int MAXDAILY = 100;
+   public static final int MAXHALL = 10;
+   int score;
+   int scoreticks;
+   List scoreBoard;
+   List dailyScoreBoard;
+   Font highscoreFont;
+   FontMetrics highscoreFontMet;
+   Rectangle previewRect;
+   Rectangle joinRect;
+   Rectangle submitRect;
+   Rectangle playagainRect;
+   boolean highscoresDone = false;
+   boolean submitScore = false;
+   boolean submittedScore = false;
+   boolean useHighScores = true;
+   String userName;
+   String hsStatus = "";
+   String event = "";
+   public static String cryptKey = "JeloRaverLovesJung1111";
+   public static char[] HEX = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+   public String[] nameH;
+   public int[] scoreH;
+   public String[] nameD;
+   public int[] scoreD;
+   public int maxTop;
+   public int maxDaily;
+   static int MAXLOADSTEPS;
+   int loadedPieces = 1;
+   int loadedDelta;
+   int loadDelta;
+   int loadticks;
+   int mapticks;
+   String errorMsg;
+   boolean runtimeError = false;
+   boolean imageLoadingError = false;
+   String gameCookie;
+   boolean displayOptions = false;
+   Rectangle offRect;
+   Rectangle onRect;
+   Rectangle changeRect;
+   Rectangle optionsRect;
+   Rectangle titleRect;
+   Rectangle mapRect;
+   boolean mapIcon = false;
+   int keychange = -1;
+   Graphics offG;
+   Image offImg;
+   static final int SLEEPTIME = 15;
+   Thread t;
+   boolean smartSleep = false;
+   long startTime;
+   int ticks;
+   int leveldoneticks;
+   MediaTracker mt;
+   int SPECIALSTART = 38;
+   int SPECIALSTOP = 41;
+   int SPECIALMULT = 100;
+   static final int NUMTILES = 40;
+   static final int NUMOBJECTS = 50;
+   boolean loadedImages = false;
+   int currentTileset;
+   Image bgImg;
+   Image tileImg;
+   Image objectImg;
+   Image[] tiles;
+   Image[] bgtiles;
+   Image[] objects;
+   Image[] numbers;
+   Image[] energy;
+   Image[] coinspin;
+   Image[] mapspin;
+   Image[] rubyspin;
+   Image[] levels;
+   Image[] titles;
+   Image[] highscoreImgs;
+   Image titleImg;
+   Image winImg;
+   Image helpImg;
+   int bgDelta = 128;
+   boolean addedFlips = false;
+   int pauseBtnNum;
+   int statusBarNum;
+   int closedDoorNum;
+   int openDoorNum;
+   static final int TOTSOUNDS = 6;
+   int[] sndSize = new int[]{3438, 8145, 14876, 16201, 3020, 3493, 2490};
+   AudioDataStream[] sndEfx;
+   String[] sndURL;
+   boolean soundOn = true;
+   static final int MAXJUMPDELTA = 96;
+   int charnum;
+   int speed = 16;
+   boolean jumping = false;
+   boolean climbing = false;
+   boolean falling = false;
+   int jumpDelta;
+   int jumpFactor;
+   long climbAttachTime;
+   String leftArrow = "LEFT";
+   String rightArrow = "RIGHT";
+   String downArrow = "DOWN";
+   String upArrow = "UP";
+   String spaceBar = "SPACE";
+   int left = 106;
+   int right = 108;
+   int upkey = 105;
+   int downkey = 107;
+   int jumpkey = 32;
+   static final int KEYUP = 0;
+   static final int KEYDOWN = 1;
+   static final int KEYLEFT = 2;
+   static final int KEYRIGHT = 3;
+   static final int KEYUPLEFT = 4;
+   static final int KEYUPRIGHT = 5;
+   static final int MOUSEUP = 6;
+   static final int MOUSEDOWN = 7;
+   static final int KEYJUMP = 8;
+   boolean jumpKeyLetGo = true;
+   int[] keystrokes;
+   int keyticks;
+   static int XTILES1 = 10;
+   static int YTILES1 = 38;
+   static int XTILES2 = 31;
+   static int YTILES2 = 46;
+   static int XTILES3 = 69;
+   static int YTILES3 = 24;
+   int XTILES;
+   int YTILES;
+   static int WALKABLETILE = 9;
+   static int CLIMBINGTILE = 23;
+   static int NONWALKABLE = 22;
+   String[] levelStr;
+   int[][] origMap;
+   int[][] tileMap;
+   static final int TOTCOLORS = 4;
+   Color[] level1;
+   Color[] level2;
+   Color[] level3;
+   int curxStart;
+   int curyStart;
+   int curxOff;
+   int curyOff;
+   int curxDelta;
+   int curyDelta;
+   String[] introStrings;
+   Vector[] introVectors;
+   static final int INTROSTEPS = 3;
+   int introStep;
+   static final int FADETIME = 15;
+   static final int UP = 0;
+   static final int DOWN = 1;
+   static final int LEFT = 2;
+   static final int RIGHT = 3;
+   static final int IDLELT = 4;
+   static final int IDLERT = 7;
+   static final int JUMPLT = 5;
+   static final int JUMPRT = 6;
+   int dir;
+   int pdir;
+   static final int CHARXOFF = 3;
+   static final int CHARYOFF = 2;
+   int charxDelta;
+   int charyDelta;
+   int[] charAnimRt;
+   int[] charAnimLt;
+   int[] charAnimUp;
+   int[] charAnimDn;
+   int[] charAnimIdleLt;
+   int[] charAnimIdleRt;
+   int[] charAnimJumpRt;
+   int[] charAnimJumpLt;
+   int curCharAnim;
+   int charticks;
+   boolean hurting;
+   int hurtticks;
+   Rectangle charRect;
+   static final int COINNUM = 1;
+   static final int ENEMY1NUM = 3;
+   static final int ENEMY2NUM = 2;
+   static final int STARTNUM = 4;
+   static final int EXITNUM = 5;
+   static final int MAPNUM = 6;
+   static final int RUBYNUM = 7;
+   static final int ENERGYNUM = 8;
+   static final int MAXLIFE = 100;
+   int life;
+   int MAXCOINS;
+   int coins;
+   int curCoinAnim;
+   int curMapAnim;
+   int curRubyAnim;
+   int curEnergyAnim;
+   int cointicks;
+   static final int MAXLEVELS = 1;
+   int level;
+   int sublevel;
+   int ilticks;
+   boolean gottenLevels;
+   boolean getSelectedLevel;
+   boolean levelDone;
+   boolean loadLevelSuccess;
+   boolean levelError;
+   boolean levelSuccess;
+   String loadLevelStr;
+   Rectangle getLevelRect;
+   List levelList;
+   Choice levelChoice;
+   static final int ENEMIES = 2;
+   int[] enemyImgRef;
+   Vector enemyLocs;
+   int eticks;
+   static final int WALKFALL = 1;
+   static final int WALKPATROLL = 2;
+   static final int JUMPING = 4;
+   static final int FOLLOW = 8;
+   static final int SHOOT = 16;
+   static final int FLYING = 32;
+   static final int CLIMBING = 64;
+   static final int EPARMS = 10;
+   static final int EXLOC = 0;
+   static final int EYLOC = 1;
+   static final int EXDLT = 2;
+   static final int EYDLT = 3;
+   static final int EANIM = 4;
+   static final int ETANIM = 5;
+   static final int ETYPE = 6;
+   static final int EABILS = 7;
+   static final int EDIR = 8;
+   static final int EEXTRA = 9;
+   int[][] enemies;
+   boolean miniGameOn;
+   int miniGameNum;
+   Vector explosions;
+   int explticks;
+   static final int VINEPERIOD = 60;
+   int vineticks1;
+   int vineticks2;
+   int vineticks3;
+   int vxloc1;
+   int vyloc1;
+   int vxloc2;
+   int vyloc2;
+   int vxloc3;
+   int vyloc3;
+   int jumperx;
+   int jumpery;
+   boolean jumperJumping;
+   int jumperticks;
+   int jumperstuck;
+   boolean gotAcross;
+   int playerx;
+   int playery;
+   int pxdelta;
+   int pydelta;
+   int pxloc;
+   int pyloc;
+   int pmovedir;
+   boolean pmoving;
+   boolean ppaused;
+   int pwin;
+   int[] vehicles;
+   int[] vspeeds;
+   int[] vdir;
+   int lanewidth;
+   int numlanes;
+   boolean g2init;
+   int g2ticks;
+   int saveError;
+   int restoreError;
+   String restoreStr;
+   char[] mloadkey;
+   int loadloc;
+   char[] minvkey;
+   int invloc;
+   boolean invincible;
+   char[] mcoinkey;
+   int coinloc;
+   char[] mmapkey;
+   int maploc;
+   boolean showmap;
+   static final int TOTALCREDITS = 24;
+   int creditOff;
+   int creditticks;
+   Rectangle creditRect;
+   String[] creditStr;
+
+   public void init() {
+      this.setLayout((LayoutManager)null);
+      WIDTH = this.size().width;
+      HEIGHT = this.size().height;
+      this.loadFont = new Font("Times", 0, 24);
+      this.loadFontMet = this.getFontMetrics(this.loadFont);
+      this.titleFont = new Font("Times", 1, 36);
+      this.titleFontMet = this.getFontMetrics(this.titleFont);
+      this.scrollFont = new Font("Dialog", 0, 18);
+      this.scrollFontMet = this.getFontMetrics(this.scrollFont);
+      this.regFont = new Font("Dialog", 0, 10);
+      this.regFontMet = this.getFontMetrics(this.regFont);
+      this.regBoldFont = new Font("Dialog", 1, 10);
+      this.regBoldFontMet = this.getFontMetrics(this.regBoldFont);
+      this.joinRect = new Rectangle(145, 166, 153, 19);
+      this.previewRect = new Rectangle(81, 192, 137, 17);
+      this.titleRect = new Rectangle(41, 44, 90, 180);
+      this.optionsRect = new Rectangle(188, 80, 76, 98);
+      this.creditRect = new Rectangle(392, 231, 50, 20);
+      this.onRect = new Rectangle(260, 57, 37, 20);
+      this.offRect = new Rectangle(300, 57, 37, 20);
+      this.changeRect = new Rectangle(260, 87, 75, 140);
+      this.submitRect = new Rectangle(318, 73, 47, 27);
+      this.playagainRect = new Rectangle(367, 73, 68, 27);
+      this.mapRect = new Rectangle(WIDTH - 30, 0, 30, 30);
+      this.charRect = new Rectangle(192, 128, 64, 64);
+      this.introStrings = new String[3];
+      this.introVectors = new Vector[3];
+      this.introStrings[0] = "Help Bug Bot find his friends! They've been scattered all over, and the only way to get them back is to collect all the magnets. When all the magnets have been found, they will combine and draw all the bots together. You have to travel through 3 worlds with 3 levels each to find all the magnets... Good Luck!";
+      this.introStrings[1] = "Over the baboons' growls, Tarzan hears Jane yelling. He must have just missed her, but she's not that far ahead of him now.";
+      this.introStrings[2] = "The baboons are getting angrier. Tarzan knows he's gaining on her.";
+
+      for(int var1 = 0; var1 < 3; ++var1) {
+         this.introVectors[var1] = new Vector();
+         this.makeClippedString(this.introStrings[var1], 384, this.introVectors[var1], this.scrollFontMet);
+      }
+
+      this.tiles = new Image[40];
+      this.bgtiles = new Image[3];
+      this.objects = new Image[50];
+      this.numbers = new Image[12];
+      this.coinspin = new Image[6];
+      this.mapspin = new Image[7];
+      this.rubyspin = new Image[6];
+      this.energy = new Image[6];
+      this.levels = new Image[5];
+      this.titles = new Image[5];
+      this.highscoreImgs = new Image[2];
+      this.enemyImgRef = new int[2];
+      this.level1 = new Color[4];
+      this.level2 = new Color[4];
+      this.level3 = new Color[4];
+      this.mapIcon = false;
+      this.level1[0] = new Color(85, 0, 0);
+      this.level1[1] = new Color(119, 0, 0);
+      this.level1[2] = new Color(119, 119, 119);
+      this.level1[3] = new Color(0, 102, 153);
+      this.level2[0] = new Color(204, 204, 153);
+      this.level2[1] = new Color(255, 0, 0);
+      this.level2[2] = new Color(102, 102, 102);
+      this.level2[3] = new Color(0, 255, 204);
+      this.level3[0] = new Color(0, 136, 0);
+      this.level3[1] = new Color(170, 0, 0);
+      this.level3[2] = new Color(0, 0, 68);
+      this.level3[3] = new Color(0, 102, 255);
+      this.keystrokes = new int[10];
+      this.sndURL = new String[6];
+
+      for(int var2 = 0; var2 < 6; ++var2) {
+         this.sndURL[var2] = this.getParameter("sndefx" + var2);
+      }
+
+      this.gameCookie = this.getParameter("gamecookie");
+      this.levelStr = new String[1];
+      this.levelStr[0] = "##32,16$500,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0$1,0,0,100,0,0,0,100,0,0,0,0,0,0,0,0$0,1,0,0,0,300,0,0,0,0,300,0,0,0,0,0$0,0,1,0,1,1,0,0,0,1,1,0,0,0,0,0$0,1,0,0,5,0,0,0,0,0,6,0,0,700,0,0$0,0,1,0,206,0,0,0,0,0,6,0,0,1,0,0$0,0,0,1,6,0,0,600,0,0,6,0,1,0,0,0$100,0,0,0,6,0,0,1,0,0,6,1,0,0,100,0$700,0,0,0,5,0,0,0,0,0,206,0,0,0,1,0$100,0,0,0,6,0,0,0,0,0,6,0,0,0,0,0$0,0,0,0,705,0,700,0,700,0,6,0,0,0,0,100$0,0,0,0,1,0,1,0,1,0,6,0,0,0,0,100$0,0,0,1,0,0,0,0,7,0,6,1,0,0,0,0$0,0,1,5,0,300,0,0,300,0,5,0,1,0,0,0$0,1,6,7,1,1,1,1,1,1,1,0,0,1,0,0$1,5,7,0,0,0,700,0,300,6,0,0,0,0,1,0$6,7,0,0,0,0,1,1,1,7,0,0,0,0,0,0$5,0,0,0,0,300,0,100,0,300,700,0,0,0,0,100$205,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0$6,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0$5,7,0,0,3,0,0,0,0,0,700,0,0,0,0,1$6,0,0,0,7,0,0,300,700,0,300,0,700,300,0,5$1,0,1,0,0,0,1,1,1,1,1,1,1,1,1,5$0,0,400,0,0,300,0,0,0,0,0,0,0,0,3,6$0,0,1,1,1,1,1,1,1,1,1,1,0,0,3,5$0,0,3,6,0,0,0,300,0,700,5,2,0,0,3,105$100,0,3,5,0,1,1,1,1,1,6,2,0,0,3,706$700,0,3,5,0,2,0,100,100,0,6,2,0,0,3,106$100,0,3,6,0,2,0,0,300,0,5,2,0,0,3,5$0,0,3,5,1,1,1,1,1,1,1,2,0,0,3,5$0,800,0,6,700,0,300,0,0,0,300,0,700,0,0,6$1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1$";
+      this.explosions = new Vector();
+      this.levelList = new List();
+      this.levelList.reshape((WIDTH >> 1) - 100, 50, 200, 150);
+      this.levelList.hide();
+      this.add(this.levelList);
+      this.levelChoice = new Choice();
+      this.levelChoice.addItem("Tileset 1");
+      this.levelChoice.addItem("Tileset 2");
+      this.levelChoice.addItem("Tileset 3");
+      this.levelChoice.reshape(328, 60, 100, 20);
+      this.levelChoice.hide();
+      this.add(this.levelChoice);
+      this.getLevelRect = new Rectangle(328, 164, 100, 42);
+      String var3 = this.getParameter("highscores");
+      if (var3 != null && var3.equals("false")) {
+         this.useHighScores = false;
+      }
+
+      if (this.useHighScores) {
+         this.event = this.getParameter("eventid");
+         this.nameH = new String[10];
+         this.scoreH = new int[11];
+         this.nameD = new String[100];
+         this.scoreD = new int[101];
+         this.highscoreFont = new Font("Courier", 1, 12);
+         this.highscoreFontMet = this.getFontMetrics(this.highscoreFont);
+         this.scoreBoard = new List(0, false);
+         this.scoreBoard.setBackground(Color.black);
+         this.scoreBoard.setForeground(Color.white);
+         this.scoreBoard.hide();
+         this.add(this.scoreBoard);
+         this.scoreBoard.reshape(5, 125, 215, 125);
+         this.scoreBoard.setFont(this.highscoreFont);
+         this.dailyScoreBoard = new List(0, false);
+         this.dailyScoreBoard.setBackground(Color.black);
+         this.dailyScoreBoard.setForeground(Color.white);
+         this.dailyScoreBoard.hide();
+         this.add(this.dailyScoreBoard);
+         this.dailyScoreBoard.reshape(228, 125, 215, 125);
+         this.dailyScoreBoard.setFont(this.highscoreFont);
+      }
+
+      this.starfield = new Point[200];
+
+      for(int var4 = 0; var4 < 200; ++var4) {
+         this.starfield[var4] = new Point((int)Math.floor(Math.random() * (double)WIDTH), (int)Math.floor(Math.random() * (double)HEIGHT));
+      }
+
+      this.friends = new int[64];
+
+      for(int var5 = 0; var5 < 64; ++var5) {
+         this.friends[var5] = (int)Math.floor(Math.random() * (double)WIDTH);
+      }
+
+      this.vehicles = new int[this.numlanes];
+      this.vspeeds = new int[this.numlanes];
+      this.vdir = new int[this.numlanes];
+      this.g2init = false;
+      this.t = new Thread(this);
+      this.t.start();
+   }
+
+   public void makeClippedString(String var1, int var2, Vector var3, FontMetrics var4) {
+      String var5 = "";
+      String var6 = var1;
+      String var7 = "";
+      boolean var8 = false;
+
+      do {
+         var8 = false;
+         if (var4.stringWidth(var6) <= var2) {
+            var5 = var6;
+         } else {
+            boolean var9 = false;
+            var7 = new String(var6);
+            var6 = "";
+            StringTokenizer var10 = new StringTokenizer(var7, " ");
+            var5 = var10.nextToken();
+
+            label28:
+            while(true) {
+               while(true) {
+                  if (!var10.hasMoreTokens()) {
+                     break label28;
+                  }
+
+                  String var11 = var10.nextToken();
+                  if (!var9 && var4.stringWidth(var5 + " " + var11) < var2) {
+                     var5 = var5 + " " + var11;
+                  } else {
+                     var6 = var6 + var11 + " ";
+                     var9 = true;
+                     var8 = true;
+                  }
+               }
+            }
+         }
+
+         var3.addElement(var5);
+      } while(var8);
+
+   }
+
+   public void initGame() {
+      this.initGame(this.levelStr[this.level]);
+   }
+
+   public void initGame(String var1) {
+      StringTokenizer var2 = new StringTokenizer(var1, "$");
+      String var3 = var2.nextToken();
+      var3 = var3.substring(2);
+      this.YTILES = Integer.parseInt(var3.substring(0, var3.indexOf(",")));
+      this.XTILES = Integer.parseInt(var3.substring(var3.indexOf(",") + 1));
+      this.curxStart = this.XTILES - 3;
+      this.curyStart = this.YTILES - 4;
+      int var4 = 0;
+      this.origMap = new int[this.YTILES][this.XTILES];
+      this.tileMap = new int[this.YTILES][this.XTILES];
+
+      int var7;
+      label95:
+      for(int var5 = 0; var5 < this.YTILES; ++var5) {
+         if (!var2.hasMoreElements()) {
+            System.out.println("Error in level str: Not enough rows at " + var5);
+            break;
+         }
+
+         StringTokenizer var6 = new StringTokenizer(var2.nextToken(), ",");
+
+         for(var7 = 0; var7 < this.XTILES; ++var7) {
+            if (!var6.hasMoreElements()) {
+               System.out.println("Error in level str: Not enough cols at " + var5 + "," + var7);
+               break label95;
+            }
+
+            int var8 = Integer.parseInt(var6.nextToken());
+            this.origMap[var5][var7] = var8;
+            this.tileMap[var5][var7] = var8;
+            if (this.tileMap[var5][var7] / this.SPECIALMULT == 3 || this.tileMap[var5][var7] / this.SPECIALMULT == 2) {
+               ++var4;
+            }
+
+            if (this.tileMap[var5][var7] / this.SPECIALMULT == 4) {
+               this.curxStart = var7 - 3;
+               this.curyStart = var5 - 2;
+            }
+         }
+      }
+
+      this.MAXCOINS = 0;
+      if (var4 > 0) {
+         this.enemies = new int[var4][10];
+      } else {
+         this.enemies = null;
+      }
+
+      var4 = 0;
+
+      for(int var9 = 0; var9 < this.YTILES; ++var9) {
+         for(var7 = 0; var7 < this.XTILES; ++var7) {
+            if (this.tileMap[var9][var7] >= this.SPECIALMULT) {
+               if (this.tileMap[var9][var7] / this.SPECIALMULT == 3) {
+                  this.enemies[var4][0] = var7;
+                  this.enemies[var4][1] = var9;
+                  this.enemies[var4][2] = 0;
+                  this.enemies[var4][3] = 0;
+                  this.enemies[var4][4] = 0;
+                  this.enemies[var4][5] = 4;
+                  this.enemies[var4][6] = 1;
+                  this.enemies[var4][8] = 2;
+                  this.enemies[var4++][7] = 10;
+               } else if (this.tileMap[var9][var7] / this.SPECIALMULT == 2) {
+                  this.enemies[var4][0] = var7;
+                  this.enemies[var4][1] = var9;
+                  this.enemies[var4][2] = 0;
+                  this.enemies[var4][3] = 0;
+                  this.enemies[var4][4] = 0;
+                  this.enemies[var4][5] = 5;
+                  this.enemies[var4][6] = 0;
+                  this.enemies[var4][8] = 0;
+                  this.enemies[var4++][7] = 64;
+               } else if (this.tileMap[var9][var7] / this.SPECIALMULT == 1) {
+                  ++this.MAXCOINS;
+               }
+            }
+         }
+      }
+
+      if (this.level < 3) {
+         WALKABLETILE = 2;
+         CLIMBINGTILE = 5;
+      } else if (this.level < 6) {
+         WALKABLETILE = 5;
+         CLIMBINGTILE = 13;
+      } else {
+         WALKABLETILE = 2;
+         CLIMBINGTILE = 5;
+      }
+
+      for(var7 = 0; var7 < 10; ++var7) {
+         this.keystrokes[var7] = 0;
+      }
+
+      this.curxOff = this.curxStart;
+      this.curyOff = this.curyStart;
+      if (this.curxStart < this.XTILES / 2) {
+         this.dir = 3;
+      } else {
+         this.dir = 2;
+      }
+
+      this.curxDelta = 0;
+      this.curyDelta = 0;
+      this.bgDelta = 0;
+      this.jumping = false;
+      this.keystrokes[8] = 0;
+      this.falling = false;
+      this.climbing = false;
+      this.coins = 0;
+      this.ticks = 0;
+      this.scoreticks = 0;
+      this.life = 100;
+      this.mapIcon = false;
+      this.hurting = false;
+      this.state = 2;
+   }
+
+   public String getSaveString() {
+      String var1 = this.score + ":" + this.level;
+
+      int var3;
+      for(int var2 = 0; var2 < this.YTILES; ++var2) {
+         for(var3 = 0; var3 < this.XTILES; ++var3) {
+            if (this.origMap[var2][var3] >= this.SPECIALMULT && this.origMap[var2][var3] / this.SPECIALMULT == 1) {
+               if (this.tileMap[var2][var3] >= this.SPECIALMULT && this.tileMap[var2][var3] / this.SPECIALMULT == 1) {
+                  var1 = var1 + "1";
+               } else {
+                  var1 = var1 + "0";
+               }
+            }
+         }
+      }
+
+      var1 = var1 + ":";
+
+      int var4;
+      for(var3 = 0; var3 < this.YTILES; ++var3) {
+         for(var4 = 0; var4 < this.XTILES; ++var4) {
+            if (this.origMap[var3][var4] >= this.SPECIALMULT && this.origMap[var3][var4] / this.SPECIALMULT == 7) {
+               if (this.tileMap[var3][var4] >= this.SPECIALMULT && this.tileMap[var3][var4] / this.SPECIALMULT == 7) {
+                  var1 = var1 + "1";
+               } else {
+                  var1 = var1 + "0";
+               }
+            }
+         }
+      }
+
+      var1 = var1 + ":";
+
+      for(var4 = 0; var4 < this.YTILES; ++var4) {
+         for(int var5 = 0; var5 < this.XTILES; ++var5) {
+            if (this.origMap[var4][var5] >= this.SPECIALMULT && this.origMap[var4][var5] / this.SPECIALMULT == 6) {
+               if (this.tileMap[var4][var5] >= this.SPECIALMULT && this.tileMap[var4][var5] / this.SPECIALMULT == 6) {
+                  var1 = var1 + "1";
+               } else {
+                  var1 = var1 + "0";
+               }
+            }
+         }
+      }
+
+      return var1;
+   }
+
+   public void destroy() {
+      if (this.t != null && this.t.isAlive()) {
+         this.t.stop();
+      }
+
+      super.destroy();
+   }
+
+   public String getUserName() {
+      String var1 = null;
+      String var2 = "/cgi-bin/global/whoami.cgi";
+      URL var3 = null;
+      URLConnection var4 = null;
+      boolean var5 = false;
+
+      try {
+         var3 = new URL("http", this.getDocumentBase().getHost(), this.getDocumentBase().getPort(), var2);
+         var4 = var3.openConnection();
+         DataInputStream var6 = new DataInputStream(var4.getInputStream());
+         String var7 = "";
+
+         while(true) {
+            var7 = var6.readLine();
+            if (var7 == null) {
+               break;
+            }
+
+            int var9;
+            if ((var9 = var7.indexOf("USERNAME")) != -1) {
+               var1 = var7.substring(var9 + 11, var7.length());
+               break;
+            }
+         }
+      } catch (Exception var8) {
+         System.out.println("Error: Could not read user name data - " + var8.getMessage());
+      }
+
+      return var1;
+   }
+
+   public static void c2x(char var0, char[] var1) {
+      var1[0] = '%';
+      var1[1] = HEX[var0 >> 4 & 15];
+      var1[2] = HEX[var0 & 15];
+   }
+
+   public static String escapeString(String var0) {
+      if (var0 == null) {
+         return null;
+      } else {
+         char[] var1 = new char[var0.length() * 3 + 1];
+         char[] var2 = var0.toCharArray();
+         boolean var3 = false;
+         boolean var4 = false;
+         int var5 = 0;
+
+         for(int var6 = 0; var5 < var0.length(); ++var6) {
+            var1[var6] = '%';
+            var1[var6 + 1] = HEX[var2[var5] >> 4 & 15];
+            var1[var6 + 2] = HEX[var2[var5] & 15];
+            var6 += 2;
+            ++var5;
+         }
+
+         return new String(var1);
+      }
+   }
+
+   public static String xorCrypt(String var0) {
+      if (var0 == null) {
+         return null;
+      } else {
+         char[] var1 = new char[var0.length()];
+         char[] var2 = var0.toCharArray();
+         char[] var3 = cryptKey.toCharArray();
+
+         for(int var4 = 0; var4 < var0.length(); ++var4) {
+            var1[var4] = (char)(var2[var4] ^ var3[var4 % cryptKey.length()]);
+         }
+
+         return new String(var1);
+      }
+   }
+
+   public void getScores() {
+      String var1 = "/cgi-bin/apps1.dll/global/escores.dll?";
+      String var2 = "event=" + this.event;
+      String var3 = xorCrypt(var2);
+      String var4 = escapeString(var3);
+      this.readScores(var1 + var4);
+   }
+
+   public void setScore() {
+      String var1 = "/cgi-bin/apps1.dll/global/escores.dll?";
+      String var2 = "event=" + this.event + "&name=" + this.userName + "&score=" + this.score;
+      String var3 = xorCrypt(var2);
+      String var4 = escapeString(var3);
+      this.readScores(var1 + var4);
+   }
+
+   public void readScores(String var1) {
+      URLConnection var3 = null;
+      URL var4 = null;
+      DataInputStream var6 = null;
+
+      try {
+         var4 = new URL("http", this.getDocumentBase().getHost(), this.getDocumentBase().getPort(), var1);
+         var3 = var4.openConnection();
+         var6 = new DataInputStream(var3.getInputStream());
+         String var5 = var6.readLine();
+         if (var5.indexOf("html") != -1 || var5.indexOf("HTML") != -1) {
+            var5 = var6.readLine();
+         }
+
+         if (var5.indexOf("Error") != -1) {
+            this.maxTop = this.maxDaily = 0;
+            this.scoreH[0] = this.scoreD[0] = this.score;
+         } else {
+            try {
+               this.maxTop = Integer.valueOf(var5);
+            } catch (NumberFormatException var11) {
+               System.out.println("Number format exception");
+               this.maxTop = 10;
+            }
+
+            var5 = var6.readLine();
+
+            try {
+               this.maxDaily = Integer.valueOf(var5);
+            } catch (NumberFormatException var10) {
+               System.out.println("Bad number: " + var10.getMessage());
+            }
+
+            int var2;
+            for(var2 = 0; var2 < this.maxTop; ++var2) {
+               var5 = var6.readLine();
+               if (var5 == null) {
+                  System.out.println("ERROR: /cgi-bin/apps1.dll/global/escores.dll returns incorrect value for maxTop");
+                  this.maxTop = var2;
+                  break;
+               }
+
+               this.nameH[var2] = var5.substring(0);
+               var5 = var6.readLine();
+
+               try {
+                  this.scoreH[var2] = Integer.valueOf(var5);
+               } catch (NumberFormatException var9) {
+                  System.out.println("Number format exception");
+                  this.scoreH[var2] = 0;
+               }
+            }
+
+            for(var2 = 0; var2 < this.maxDaily; ++var2) {
+               var5 = var6.readLine();
+               if (var5 == null) {
+                  System.out.println("ERROR: /cgi-bin/apps1.dll/global/escores.dll returns incorrect value for maxDaily");
+                  this.maxDaily = var2;
+                  return;
+               }
+
+               this.nameD[var2] = var5.substring(0);
+               var5 = var6.readLine();
+
+               try {
+                  this.scoreD[var2] = Integer.valueOf(var5);
+               } catch (NumberFormatException var8) {
+                  System.out.println("Bad number: " + var8.getMessage());
+               }
+            }
+
+         }
+      } catch (Exception var12) {
+         System.out.println("Error: Unable to read scores - " + var12.getMessage());
+      }
+   }
+
+   public void restoreLevel() {
+      int var1 = 0;
+
+      int[] var10000;
+      int var3;
+      for(int var2 = 0; var2 < this.YTILES; ++var2) {
+         for(var3 = 0; var3 < this.XTILES; ++var3) {
+            if (this.tileMap[var2][var3] >= this.SPECIALMULT && this.tileMap[var2][var3] / this.SPECIALMULT == 1) {
+               if (this.restoreStr.charAt(var1) == '%') {
+                  System.out.println("Error with save code");
+                  this.restoreError = 0;
+                  this.restoreStr = null;
+                  return;
+               }
+
+               if (this.restoreStr.charAt(var1) == '0') {
+                  var10000 = this.tileMap[var2];
+                  var10000[var3] %= this.SPECIALMULT;
+                  ++this.coins;
+               }
+
+               ++var1;
+            }
+         }
+      }
+
+      this.restoreStr = this.restoreStr.substring(this.restoreStr.indexOf(":") + 1);
+      var1 = 0;
+
+      int var4;
+      for(var3 = 0; var3 < this.YTILES; ++var3) {
+         for(var4 = 0; var4 < this.XTILES; ++var4) {
+            if (this.tileMap[var3][var4] >= this.SPECIALMULT && this.tileMap[var3][var4] / this.SPECIALMULT == 7) {
+               if (this.restoreStr.charAt(var1) == '%') {
+                  System.out.println("Error with save code");
+                  this.restoreError = 0;
+                  this.restoreStr = null;
+                  return;
+               }
+
+               if (this.restoreStr.charAt(var1) == '0') {
+                  var10000 = this.tileMap[var3];
+                  var10000[var4] %= this.SPECIALMULT;
+               }
+
+               ++var1;
+            }
+         }
+      }
+
+      this.restoreStr = this.restoreStr.substring(this.restoreStr.indexOf(":") + 1);
+      var1 = 0;
+
+      for(var4 = 0; var4 < this.YTILES; ++var4) {
+         for(int var5 = 0; var5 < this.XTILES; ++var5) {
+            if (this.tileMap[var4][var5] >= this.SPECIALMULT && this.tileMap[var4][var5] / this.SPECIALMULT == 6) {
+               if (this.restoreStr.charAt(var1) == '%') {
+                  System.out.println("Error with save code");
+                  this.restoreError = 0;
+                  this.restoreStr = null;
+                  return;
+               }
+
+               if (this.restoreStr.charAt(var1) == '0') {
+                  var10000 = this.tileMap[var4];
+                  var10000[var5] %= this.SPECIALMULT;
+                  this.mapIcon = true;
+               }
+
+               ++var1;
+            }
+         }
+      }
+
+      this.restoreStr = null;
+   }
+
+   public void updateBoards(boolean var1) {
+      int var2 = this.maxTop;
+      int var3 = this.maxDaily;
+      String var4 = this.userName;
+      if (var4 == null) {
+         var4 = "<No Name>";
+      }
+
+      boolean var5 = var1;
+      boolean var6 = false;
+      this.dailyScoreBoard.setFont(this.highscoreFont);
+      this.scoreBoard.setFont(this.highscoreFont);
+      this.scoreBoard.clear();
+      if (var2 == 0 && var1) {
+         this.scoreBoard.addItem(this.ppos10(1) + ". *" + this.pname(var4) + " " + this.pscore(this.score));
+         var6 = true;
+      }
+
+      int var7 = 0;
+
+      for(int var8 = 0; var8 < var2; ++var8) {
+         ++var7;
+         if (var5 && this.score >= this.scoreH[var8]) {
+            this.scoreBoard.addItem(this.ppos10(var7) + ". *" + this.pname(var4) + " " + this.pscore(this.score));
+            ++var7;
+            this.scoreBoard.select(var8);
+            var6 = true;
+         }
+
+         if (var7 <= 10) {
+            this.scoreBoard.addItem(this.ppos10(var7) + ". " + this.pname(this.nameH[var8]) + " " + this.pscore(this.scoreH[var8]));
+         }
+      }
+
+      if (var5 && !var6) {
+         this.scoreBoard.addItem(this.ppos10(var7) + ". *" + this.pname(var4) + " " + this.pscore(this.score));
+         this.scoreBoard.select(var7);
+      }
+
+      this.dailyScoreBoard.clear();
+      var6 = false;
+      if (var3 == 0 && var5) {
+         this.dailyScoreBoard.addItem(this.ppos100(1) + ". *" + this.pname(var4) + " " + this.pscore(this.score));
+         var6 = true;
+      }
+
+      var7 = 0;
+
+      for(int var9 = 0; var9 < var3; ++var9) {
+         ++var7;
+         if (var5 && this.score >= this.scoreD[var9]) {
+            this.dailyScoreBoard.addItem(this.ppos100(var7) + ". *" + this.pname(var4) + " " + this.pscore(this.score));
+            ++var7;
+            this.dailyScoreBoard.select(var9);
+            var6 = true;
+         }
+
+         if (var7 <= 100) {
+            this.dailyScoreBoard.addItem(this.ppos100(var7) + ". " + this.pname(this.nameD[var9]) + " " + this.pscore(this.scoreD[var9]));
+         }
+      }
+
+      if (var5 && !var6) {
+         this.dailyScoreBoard.addItem(this.ppos100(var7) + ". *" + this.pname(var4) + " " + this.pscore(this.score));
+         this.dailyScoreBoard.select(var7);
+      }
+
+   }
+
+   public String ppos10(int var1) {
+      return var1 < 10 ? " " + var1 : String.valueOf(var1);
+   }
+
+   public String ppos100(int var1) {
+      if (var1 < 10) {
+         return "  " + var1;
+      } else {
+         return var1 < 100 ? " " + var1 : String.valueOf(var1);
+      }
+   }
+
+   public String pname(String var1) {
+      String var2 = var1;
+      int var3 = 15 - var1.length();
+      if (var3 <= 0) {
+         return var1.substring(0, 15);
+      } else {
+         for(int var4 = 0; var4 < var3; ++var4) {
+            var2 = var2 + " ";
+         }
+
+         return var2;
+      }
+   }
+
+   public String pscore(int var1) {
+      return String.valueOf(var1);
+   }
+
+   public void run() {
+      try {
+         int var3;
+         int var10;
+         int var41;
+         int var48;
+         int var50;
+         int var54;
+         int var62;
+         if (this.state == 15) {
+            this.levelList.hide();
+            this.levelChoice.hide();
+            if (this.useHighScores) {
+               this.scoreBoard.hide();
+               this.dailyScoreBoard.hide();
+            }
+
+            this.mt = new MediaTracker(this);
+            MAXLOADSTEPS = 0;
+            System.out.println("** Getting base images");
+            this.tileImg = this.getImage(this.getDocumentBase(), this.getParameter("tileimg1"));
+            this.bgImg = this.getImage(this.getDocumentBase(), this.getParameter("bgimg1"));
+            this.objectImg = this.getImage(this.getDocumentBase(), this.getParameter("objectimg"));
+            this.titleImg = this.getImage(this.getDocumentBase(), this.getParameter("titleimg"));
+            this.mt.addImage(this.tileImg, MAXLOADSTEPS++);
+            this.mt.addImage(this.bgImg, MAXLOADSTEPS++);
+            this.mt.addImage(this.objectImg, MAXLOADSTEPS++);
+            this.mt.addImage(this.titleImg, MAXLOADSTEPS++);
+            System.out.println("** Getting crop images");
+            ImageProducer var1 = this.objectImg.getSource();
+            int var2 = MAXLOADSTEPS;
+
+            int var4;
+            for(var3 = 0; var3 < 4; ++var3) {
+               var4 = var3 * 73;
+               byte var5 = 55;
+               this.objects[var3] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(var4, var5, 73, 55)));
+               this.mt.addImage(this.objects[var3], MAXLOADSTEPS++);
+            }
+
+            for(var4 = 0; var4 < 4; ++var4) {
+               var41 = var4 * 73;
+               byte var6 = 0;
+               this.objects[MAXLOADSTEPS - var2] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(var41, var6, 73, 55)));
+               this.mt.addImage(this.objects[MAXLOADSTEPS - var2], MAXLOADSTEPS++);
+            }
+
+            int var42;
+            for(var41 = 0; var41 < 4; ++var41) {
+               var42 = var41 * 70;
+               byte var7 = 110;
+               this.objects[MAXLOADSTEPS - var2] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(var42, var7, 70, 79)));
+               this.mt.addImage(this.objects[MAXLOADSTEPS - var2], MAXLOADSTEPS++);
+            }
+
+            this.objects[MAXLOADSTEPS - var2] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(292, 0, 73, 54)));
+            this.mt.addImage(this.objects[MAXLOADSTEPS - var2], MAXLOADSTEPS++);
+            this.objects[MAXLOADSTEPS - var2] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(366, 1, 73, 54)));
+            this.mt.addImage(this.objects[MAXLOADSTEPS - var2], MAXLOADSTEPS++);
+            this.objects[MAXLOADSTEPS - var2] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(292, 55, 73, 54)));
+            this.mt.addImage(this.objects[MAXLOADSTEPS - var2], MAXLOADSTEPS++);
+            this.objects[MAXLOADSTEPS - var2] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(366, 56, 73, 54)));
+            this.mt.addImage(this.objects[MAXLOADSTEPS - var2], MAXLOADSTEPS++);
+            this.statusBarNum = MAXLOADSTEPS - var2;
+            this.objects[MAXLOADSTEPS - var2] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(283, 174, 113, 25)));
+            this.mt.addImage(this.objects[MAXLOADSTEPS - var2], MAXLOADSTEPS++);
+            this.pauseBtnNum = MAXLOADSTEPS - var2;
+            this.objects[MAXLOADSTEPS - var2] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(284, 199, 44, 43)));
+            this.mt.addImage(this.objects[MAXLOADSTEPS - var2], MAXLOADSTEPS++);
+            this.closedDoorNum = MAXLOADSTEPS - var2;
+            this.objects[MAXLOADSTEPS - var2] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(283, 110, 64, 64)));
+            this.mt.addImage(this.objects[MAXLOADSTEPS - var2], MAXLOADSTEPS++);
+            this.openDoorNum = MAXLOADSTEPS - var2;
+            this.objects[MAXLOADSTEPS - var2] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(347, 110, 64, 64)));
+            this.mt.addImage(this.objects[MAXLOADSTEPS - var2], MAXLOADSTEPS++);
+            this.enemyImgRef[0] = MAXLOADSTEPS - var2;
+
+            int var44;
+            for(var42 = 0; var42 < 10; ++var42) {
+               var44 = var42 * 22 + 3;
+               short var8 = 190;
+               this.objects[var42 + this.enemyImgRef[0]] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(var44, var8, 22, 64)));
+               this.mt.addImage(this.objects[var42 + this.enemyImgRef[0]], MAXLOADSTEPS++);
+            }
+
+            this.enemyImgRef[1] = MAXLOADSTEPS - var2;
+
+            int var46;
+            for(var44 = 0; var44 < 6; ++var44) {
+               var46 = var44 % 3 * 100;
+               short var9 = 269;
+               if (var44 >= 3) {
+                  var9 = 374;
+               }
+
+               this.objects[var44 + this.enemyImgRef[1]] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(var46, var9, 100, 72)));
+               this.mt.addImage(this.objects[var44 + this.enemyImgRef[1]], MAXLOADSTEPS++);
+            }
+
+            this.levels[0] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(156, 459, 64, 24)));
+            this.levels[1] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(221, 458, 11, 23)));
+            this.levels[2] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(235, 458, 11, 23)));
+            this.levels[3] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(249, 458, 11, 23)));
+            this.levels[4] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(262, 476, 13, 6)));
+
+            for(var46 = 0; var46 < 5; ++var46) {
+               this.mt.addImage(this.levels[var46], MAXLOADSTEPS++);
+            }
+
+            for(var48 = 0; var48 < 12; ++var48) {
+               var10 = var48 * 15;
+               short var11 = 348;
+               this.numbers[var48] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(var10, var11, 15, 24)));
+               this.mt.addImage(this.numbers[var48], MAXLOADSTEPS++);
+            }
+
+            for(var10 = 0; var10 < 7; ++var10) {
+               var50 = var10 * 30;
+               short var12 = 616;
+               this.mapspin[var10] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(var50, var12, 30, 30)));
+               this.mt.addImage(this.mapspin[var10], MAXLOADSTEPS++);
+            }
+
+            for(var50 = 0; var50 < 6; ++var50) {
+               var54 = var50 * 30 + 210;
+               short var13 = 616;
+               this.rubyspin[var50] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(var54, var13, 30, 30)));
+               this.mt.addImage(this.rubyspin[var50], MAXLOADSTEPS++);
+            }
+
+            int var57;
+            for(var54 = 0; var54 < 5; ++var54) {
+               var57 = var54 * 19;
+               short var14 = 646;
+               this.energy[var54] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(var57, var14, 19, 40)));
+               this.mt.addImage(this.energy[var54], MAXLOADSTEPS++);
+            }
+
+            for(var57 = 0; var57 < 6; ++var57) {
+               var62 = var57 * 26;
+               short var15 = 457;
+               this.coinspin[var57] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(var62, var15, 26, 26)));
+               this.mt.addImage(this.coinspin[var57], MAXLOADSTEPS++);
+            }
+
+            this.highscoreImgs[0] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(0, 483, 448, 133)));
+            this.highscoreImgs[1] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(277, 455, 47, 28)));
+
+            for(var62 = 0; var62 < 2; ++var62) {
+               this.mt.addImage(this.highscoreImgs[var62], MAXLOADSTEPS++);
+            }
+
+            System.out.println("** Getting title images");
+            var1 = this.titleImg.getSource();
+            this.titles[0] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(1081, 0, 378, 214)));
+            this.titles[1] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(1459, 0, 143, 190)));
+            this.titles[2] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(703, 0, 378, 214)));
+            this.titles[3] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(0, 0, 256, 256)));
+            this.titles[4] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(255, 0, 448, 256)));
+
+            for(int var69 = 0; var69 < 5; ++var69) {
+               this.mt.addImage(this.titles[var69], MAXLOADSTEPS++);
+            }
+
+            System.out.println("** Getting level 1 images");
+            var1 = this.tileImg.getSource();
+
+            int var17;
+            int var18;
+            for(int var16 = 0; var16 < 40; ++var16) {
+               var17 = var16 % 8 * 64;
+               var18 = var16 / 8 * 64;
+               this.tiles[var16] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(var17, var18, 64, 64)));
+               this.mt.addImage(this.tiles[var16], MAXLOADSTEPS++);
+            }
+
+            var1 = this.bgImg.getSource();
+
+            for(var17 = 0; var17 < 3; ++var17) {
+               var18 = var17 * 256;
+               byte var19 = 0;
+               this.bgtiles[var17] = this.createImage(new FilteredImageSource(var1, new CropImageFilter(var18, var19, 256, 256)));
+               this.mt.addImage(this.bgtiles[var17], MAXLOADSTEPS++);
+            }
+
+            this.mt.checkAll(true);
+            MAXLOADSTEPS += 6;
+            this.sndEfx = new AudioDataStream[6];
+            this.state = 0;
+            this.miniGameOn = true;
+            this.g2init = false;
+         }
+
+         byte[] var38 = null;
+         byte[] var39 = new byte[1024];
+         var3 = 0;
+         boolean var40 = false;
+         var41 = 0;
+         URL var43 = null;
+         URLConnection var45 = null;
+         DataInputStream var47 = null;
+
+         while(true) {
+            if (this.miniGameOn) {
+               if (this.miniGameNum == 0) {
+                  Vector var52 = this.explosions;
+                  synchronized(var52){}
+
+                  try {
+                     for(var50 = 0; var50 < this.explosions.size(); ++var50) {
+                        Rectangle var56 = (Rectangle)this.explosions.elementAt(var50);
+                        ++var56.width;
+                        if (var56.width > 30) {
+                           this.explosions.removeElement(var56);
+                        }
+                     }
+                  } catch (Throwable var31) {
+                     throw var31;
+                  }
+
+                  if (this.vineticks1 == -1) {
+                     this.vineticks1 = (int)Math.floor(Math.random() * 60.0D);
+                     this.vineticks2 = (int)Math.floor(Math.random() * 50.0D);
+                     this.vineticks3 = (int)Math.floor(Math.random() * 70.0D);
+                  }
+
+                  this.vineticks1 = (this.vineticks1 + 1) % 60;
+                  this.vineticks2 = (this.vineticks2 + 1) % 50;
+                  this.vineticks3 = (this.vineticks3 + 1) % 70;
+                  this.vxloc1 = (int)Math.floor(30.0D * Math.cos(6.283185307179586D * (double)this.vineticks1 / 60.0D));
+                  this.vyloc1 = (int)Math.abs(Math.floor(30.0D * Math.sin(6.283185307179586D * (double)this.vineticks1 / 60.0D)));
+                  this.vxloc2 = (int)Math.floor(30.0D * Math.cos(6.283185307179586D * (double)this.vineticks2 / 50.0D));
+                  this.vyloc2 = (int)Math.abs(Math.floor(30.0D * Math.sin(6.283185307179586D * (double)this.vineticks2 / 50.0D)));
+                  this.vxloc3 = (int)Math.floor(30.0D * Math.cos(6.283185307179586D * (double)this.vineticks3 / 70.0D));
+                  this.vyloc3 = (int)Math.abs(Math.floor(30.0D * Math.sin(6.283185307179586D * (double)this.vineticks3 / 70.0D)));
+                  if (this.jumperJumping) {
+                     ++this.jumperticks;
+                     if (this.jumperticks < 8) {
+                        this.jumpery -= 3;
+                     } else if (this.jumperticks < 10) {
+                        this.jumpery -= 2;
+                     } else if (this.jumperticks < 12) {
+                        this.jumpery += 2;
+                     } else {
+                        this.jumpery += 3;
+                     }
+
+                     this.jumperx += 4;
+                     if (this.jumperx > WIDTH) {
+                        this.jumperJumping = false;
+                        this.jumperx = 0;
+                        this.jumpery = 60;
+                        this.gotAcross = true;
+                     } else if (this.jumperx > (WIDTH >> 2) - (this.vxloc1 + 10) && this.jumperx < (WIDTH >> 2) - (this.vxloc1 - 10) && this.jumperstuck != 0) {
+                        this.jumperstuck = 0;
+                        this.jumperJumping = false;
+                     } else if (this.jumperx > (WIDTH >> 1) - (this.vxloc2 + 10) && this.jumperx < (WIDTH >> 1) - (this.vxloc2 - 10) && this.jumperstuck != 1) {
+                        this.jumperstuck = 1;
+                        this.jumperJumping = false;
+                     } else if (this.jumperx > 3 * (WIDTH >> 2) - (this.vxloc3 + 10) && this.jumperx < 3 * (WIDTH >> 2) - (this.vxloc3 - 10) && this.jumperstuck != 2) {
+                        this.jumperstuck = 2;
+                        this.jumperJumping = false;
+                     } else if (this.jumperticks >= 20) {
+                        this.jumperJumping = false;
+                        this.jumperticks = 0;
+                        this.jumperstuck = -1;
+                        this.jumperx = 0;
+                        this.jumpery = 60;
+                     }
+                  } else if (this.jumperstuck != -1) {
+                     if (this.jumperstuck == 0) {
+                        this.jumperx = (WIDTH >> 2) - this.vxloc1;
+                        this.jumpery = 60 + this.vyloc1;
+                     } else if (this.jumperstuck == 1) {
+                        this.jumperx = (WIDTH >> 1) - this.vxloc2;
+                        this.jumpery = 60 + this.vyloc2;
+                     } else if (this.jumperstuck == 2) {
+                        this.jumperx = 3 * (WIDTH >> 2) - this.vxloc3;
+                        this.jumpery = 60 + this.vyloc3;
+                     }
+                  }
+               } else if (this.miniGameNum == 1 && !this.ppaused) {
+                  if (!this.g2init) {
+                     for(var48 = 0; var48 < this.numlanes; ++var48) {
+                        this.vspeeds[var48] = (int)Math.floor(Math.random() * 3.0D + 1.0D);
+                        if (Math.random() * 100.0D > 50.0D) {
+                           this.vdir[var48] = 1;
+                           this.vehicles[var48] = 0;
+                        } else {
+                           this.vdir[var48] = -1;
+                           this.vehicles[var48] = 90;
+                        }
+                     }
+
+                     this.playerx = 30;
+                     this.playery = 10;
+                     this.pxloc = -1;
+                     this.pyloc = 4;
+                     this.pxdelta = 0;
+                     this.pydelta = 0;
+                     this.pmoving = false;
+                     this.g2ticks = 0;
+                     this.g2init = true;
+                  }
+
+                  ++this.g2ticks;
+                  if (this.g2ticks % 2 > 0) {
+                     if (this.pmoving) {
+                        if (this.pmovedir == 3) {
+                           this.pxdelta += 4;
+                           if (this.pxdelta > this.lanewidth) {
+                              this.pmoving = false;
+                              this.pxdelta = 0;
+                              ++this.pxloc;
+                              if (this.pxloc >= this.numlanes) {
+                                 ++this.pwin;
+                                 this.g2init = false;
+                              }
+                           }
+                        } else if (this.pmovedir == 2) {
+                           this.pxdelta -= 4;
+                           if (Math.abs(this.pxdelta) > this.lanewidth) {
+                              this.pmoving = false;
+                              this.pxdelta = 0;
+                              --this.pxloc;
+                           }
+                        } else if (this.pmovedir == 0) {
+                           this.pydelta -= 4;
+                           if (Math.abs(this.pydelta) > 10) {
+                              this.pmoving = false;
+                              this.pydelta = 0;
+                              --this.pyloc;
+                           }
+                        } else if (this.pmovedir == 1) {
+                           this.pydelta += 4;
+                           if (this.pydelta > 10) {
+                              this.pmoving = false;
+                              this.pydelta = 0;
+                              ++this.pyloc;
+                           }
+                        }
+                     }
+
+                     for(var48 = 0; var48 < this.numlanes; ++var48) {
+                        int[] var10000 = this.vehicles;
+                        var10000[var48] += this.vspeeds[var48] * this.vdir[var48];
+                        if (this.vehicles[var48] > 90) {
+                           this.vdir[var48] = -1;
+                        } else if (this.vehicles[var48] < 0) {
+                           this.vdir[var48] = 1;
+                        }
+
+                        if (var48 == this.pxloc && this.vehicles[var48] > this.pyloc * 10 && this.vehicles[var48] < (this.pyloc + 1) * 10) {
+                           this.g2init = false;
+                        }
+                     }
+                  }
+               }
+            }
+
+            boolean var51;
+            String var53;
+            boolean var58;
+            boolean var59;
+            URL var60;
+            label2047:
+            switch(this.state) {
+            case 0:
+               ++this.loadticks;
+               if (this.loadticks > 300 && this.loadDelta < 14) {
+                  ++this.loadDelta;
+                  this.loadticks = 0;
+               }
+
+               if (this.loadedPieces < MAXLOADSTEPS - 6 && this.mt.checkID(this.loadedPieces, true)) {
+                  if ((this.mt.statusID(this.loadedPieces, true) & 4) != 0 || (this.mt.statusID(this.loadedPieces, true) & 2) != 0) {
+                     System.out.println("Possible problem with image " + this.loadedPieces + "; status=" + this.mt.statusID(this.loadedPieces, false));
+                     this.imageLoadingError = true;
+                     this.state = 14;
+                     this.paint(this.getGraphics());
+                     return;
+                  }
+
+                  ++this.loadedPieces;
+                  if (this.loadedPieces == MAXLOADSTEPS - 6) {
+                     this.tileImg = null;
+                     this.bgImg = null;
+
+                     try {
+                        var41 = 0;
+                        var38 = new byte[this.sndSize[var41]];
+                        var43 = new URL(this.getDocumentBase(), this.sndURL[var41]);
+                        var45 = var43.openConnection();
+                        var47 = new DataInputStream(var45.getInputStream());
+                     } catch (Exception var30) {
+                        System.out.println("Loading sound " + var41 + " failed: " + var30.getMessage());
+                        var40 = true;
+                     }
+                  }
+               } else if (this.loadedPieces >= MAXLOADSTEPS - 6 && this.loadedPieces < MAXLOADSTEPS) {
+                  try {
+                     var59 = false;
+                     if (!var40) {
+                        var48 = var47.read(var39);
+                     } else {
+                        var48 = -1;
+                     }
+
+                     if (var48 == -1) {
+                        if (var47 != null) {
+                           var47.close();
+                        }
+
+                        if (!var40) {
+                           this.sndEfx[var41] = new AudioDataStream(new AudioData(var38));
+                           System.out.println("** Loaded sound " + var41);
+                        }
+
+                        ++this.loadedPieces;
+                        if (this.loadedPieces == MAXLOADSTEPS) {
+                           this.loadedImages = true;
+                        } else {
+                           ++var41;
+                           var3 = 0;
+                           var38 = new byte[this.sndSize[var41]];
+                           var43 = new URL(this.getDocumentBase(), this.sndURL[var41]);
+                           var45 = var43.openConnection();
+                           var47 = new DataInputStream(var45.getInputStream());
+                        }
+
+                        var40 = false;
+                     } else {
+                        for(var10 = 0; var10 < var48; ++var10) {
+                           var38[var10 + var3] = var39[var10];
+                        }
+
+                        var3 += var48;
+                     }
+                  } catch (Exception var36) {
+                     System.out.println("Loading sound " + var41 + " failed: " + var36.getMessage());
+                     var40 = true;
+                  }
+               }
+
+               this.paint(this.getGraphics());
+            case 1:
+            case 3:
+            case 5:
+            case 7:
+               break;
+            case 2:
+               this.startTime = System.currentTimeMillis();
+               if (!this.displayOptions) {
+                  this.speed = 8;
+                  if (this.jumping) {
+                     this.speed = 12;
+                  }
+
+                  ++this.charticks;
+                  ++this.ticks;
+                  var59 = false;
+                  var51 = true;
+                  if (this.curyDelta == 0 && !this.jumping && !this.climbing && this.fallThrough(this.curyOff + 2 + 1, this.curxOff + 3)) {
+                     var58 = true;
+                     if (this.curxDelta < 0) {
+                        if (!this.fallThrough(this.curyOff + 2 + 1, this.curxOff + 3 + 1)) {
+                           var58 = false;
+                        }
+                     } else if (this.curxDelta > 0 && !this.fallThrough(this.curyOff + 2 + 1, this.curxOff + 3 - 1)) {
+                        var58 = false;
+                     }
+
+                     if (var58) {
+                        this.falling = true;
+                        this.jumping = true;
+                        this.jumpDelta = 0;
+                     }
+                  }
+
+                  boolean var66;
+                  for(var50 = 0; var50 < 10; ++var50) {
+                     if (this.keystrokes[var50] == 0 && var50 == 8) {
+                        if (this.jumping) {
+                           this.falling = true;
+                        }
+                     } else if (this.keystrokes[var50] != 0) {
+                        switch(var50) {
+                        case 0:
+                           var48 = this.getRealTile(this.curyOff + 2 - 1, this.curxOff + 3);
+                           if (this.curyOff > -2 && this.climbing && !this.jumping && var48 >= CLIMBINGTILE || this.getRealTile(this.curyOff + 2, this.curxOff + 3) >= CLIMBINGTILE && this.curyDelta <= 0) {
+                              var51 = false;
+                              this.dir = 0;
+                              this.climbing = true;
+                              this.curyDelta += this.speed;
+                              this.curxDelta = 0;
+                              if (this.charticks % 2 == 0) {
+                                 this.curCharAnim = (this.curCharAnim + 1) % this.charAnimUp.length;
+                              }
+
+                              if (this.curyDelta >= 64) {
+                                 this.changeLoc(this.dir);
+                              }
+                           }
+                           break;
+                        case 1:
+                           if (this.curyOff >= this.YTILES - 4 && (this.curyOff != this.YTILES - 4 || this.curyDelta <= 0) || !this.climbing || this.jumping) {
+                              break;
+                           }
+
+                           var51 = false;
+                           this.dir = 1;
+                           if (this.curyDelta >= 0 && this.curyDelta - this.speed < 0) {
+                              var54 = this.getRealTile(this.curyOff + 2 + 1, this.curxOff + 3);
+                              if (var54 > 0 && var54 < WALKABLETILE) {
+                                 this.climbing = false;
+                                 this.curyDelta = 0;
+                                 this.curCharAnim = 0;
+                                 break;
+                              }
+                           }
+
+                           this.curyDelta -= this.speed;
+                           this.curxDelta = 0;
+                           if (this.charticks % 2 == 0) {
+                              this.curCharAnim = (this.curCharAnim + 1) % this.charAnimDn.length;
+                           }
+
+                           if (this.curyDelta <= -64) {
+                              this.changeLoc(this.dir);
+                           }
+
+                           var48 = this.getRealTile(this.curyOff + 2, this.curxOff + 3);
+                           if (this.getRealTile(this.curyOff + 2, this.curxOff + 3) < CLIMBINGTILE && this.curyDelta == 0 || this.getRealTile(this.curyOff + 2 + 1, this.curxOff + 3) < CLIMBINGTILE && this.curyDelta < 0) {
+                              this.falling = true;
+                              this.jumping = true;
+                              this.jumpDelta = 0;
+                           }
+                           break;
+                        case 2:
+                           if (this.curxOff <= -3 || !this.canMove(this.curyOff + 2 + 1, this.curxOff + 3 - 1) && (!this.canMove(this.curyOff + 2 + 1, this.curxOff + 3) || this.curxDelta >= 0)) {
+                              break;
+                           }
+
+                           var51 = false;
+                           if (this.climbing && this.curxDelta < 32) {
+                              this.curxDelta += this.speed;
+                              this.pdir = 2;
+                              if (this.charticks % 2 == 0) {
+                                 this.curCharAnim = (this.curCharAnim + 1) % this.charAnimUp.length;
+                              }
+                           } else {
+                              this.dir = 2;
+                              if (!this.jumping && this.charticks % 2 == 0) {
+                                 this.curCharAnim = (this.curCharAnim + 1) % this.charAnimLt.length;
+                              }
+
+                              if (this.curxDelta + this.speed >= 64) {
+                                 this.changeLoc(this.dir);
+                              } else {
+                                 this.curxDelta += this.speed;
+                              }
+
+                              if (this.curyDelta == 0 && !this.jumping && !this.climbing && this.fallThrough(this.curyOff + 2 + 1, this.curxOff + 3)) {
+                                 var66 = true;
+                                 if (this.curxDelta < 0) {
+                                    if (!this.fallThrough(this.curyOff + 2 + 1, this.curxOff + 3 + 1)) {
+                                       var66 = false;
+                                    }
+                                 } else if (this.curxDelta > 0 && !this.fallThrough(this.curyOff + 2 + 1, this.curxOff + 3 - 1)) {
+                                    var66 = false;
+                                 }
+
+                                 if (var66) {
+                                    this.falling = true;
+                                    this.jumping = true;
+                                    this.jumpDelta = 0;
+                                 }
+                              } else if (this.climbing && !this.jumping) {
+                                 this.falling = true;
+                                 this.jumping = true;
+                                 this.jumpDelta = 0;
+                              }
+                           }
+                           break;
+                        case 3:
+                           if (this.curxOff >= this.XTILES - 4 || !this.canMove(this.curyOff + 2 + 1, this.curxOff + 3 + 1) && (!this.canMove(this.curyOff + 2 + 1, this.curxOff + 3) || this.curxDelta <= 0)) {
+                              break;
+                           }
+
+                           var51 = false;
+                           if (this.climbing && this.curxDelta > -32) {
+                              this.curxDelta -= this.speed;
+                              this.pdir = 3;
+                              if (this.charticks % 2 == 0) {
+                                 this.curCharAnim = (this.curCharAnim + 1) % this.charAnimDn.length;
+                              }
+                           } else {
+                              this.dir = 3;
+                              if (!this.jumping && this.charticks % 2 == 0) {
+                                 this.curCharAnim = (this.curCharAnim + 1) % this.charAnimRt.length;
+                              }
+
+                              if (this.curxDelta - this.speed <= -64) {
+                                 this.changeLoc(this.dir);
+                              } else {
+                                 this.curxDelta -= this.speed;
+                              }
+
+                              if (this.curyDelta == 0 && !this.jumping && !this.climbing && this.fallThrough(this.curyOff + 2 + 1, this.curxOff + 3)) {
+                                 var66 = true;
+                                 if (this.curxDelta < 0) {
+                                    if (!this.fallThrough(this.curyOff + 2 + 1, this.curxOff + 3 + 1)) {
+                                       var66 = false;
+                                    }
+                                 } else if (this.curxDelta > 0 && !this.fallThrough(this.curyOff + 2 + 1, this.curxOff + 3 - 1)) {
+                                    var66 = false;
+                                 }
+
+                                 if (var66) {
+                                    this.falling = true;
+                                    this.jumping = true;
+                                    this.jumpDelta = 0;
+                                 }
+                              } else if (this.climbing && !this.jumping) {
+                                 this.falling = true;
+                                 this.jumping = true;
+                                 this.jumpDelta = 0;
+                              }
+                           }
+                           break;
+                        case 8:
+                           var51 = false;
+                           if (!this.jumping) {
+                              this.falling = false;
+                              this.jumping = true;
+                              this.jumpDelta = 0;
+                           }
+                        }
+                     }
+                  }
+
+                  if (this.jumping) {
+                     var51 = false;
+                     if ((double)this.jumpDelta < 67.19999999999999D) {
+                        this.jumpFactor = 16;
+                     } else if ((double)this.jumpDelta < 81.6D) {
+                        this.jumpFactor = 8;
+                     } else if ((double)this.jumpDelta < 91.19999999999999D) {
+                        this.jumpFactor = 4;
+                     }
+
+                     if (!this.falling) {
+                        if (this.curyOff > -3) {
+                           this.curyDelta += this.jumpFactor;
+                           this.jumpDelta += this.jumpFactor;
+                           if (this.curyDelta >= 64) {
+                              this.changeLoc(0);
+                              if ((this.caughtVine(this.curyOff + 2, this.curxOff + 3) || this.curxDelta > 32 && this.caughtVine(this.curyOff + 2, this.curxOff + 3 - 1) || this.curxDelta < -32 && this.caughtVine(this.curyOff + 2, this.curxOff + 3 + 1)) && !this.climbing) {
+                                 this.curCharAnim = 0;
+                                 this.pdir = this.dir;
+                                 this.dir = 0;
+                                 this.falling = false;
+                                 this.jumping = false;
+                                 this.keystrokes[8] = 0;
+                                 this.jumpDelta = 0;
+                                 this.curyDelta = 0;
+                                 if (!this.caughtVine(this.curyOff + 2, this.curxOff + 3)) {
+                                    if (this.curxDelta > 32) {
+                                       this.changeLoc(2);
+                                    } else if (this.curxDelta < -32) {
+                                       this.changeLoc(3);
+                                    }
+                                 }
+
+                                 this.climbing = true;
+                                 this.curxDelta = 0;
+                              }
+                           }
+
+                           if (this.jumping && this.jumpDelta >= 96) {
+                              this.falling = true;
+                           }
+                        }
+                     } else {
+                        if (this.curyDelta - this.jumpFactor > -64 && (this.curyDelta < 0 || this.curyDelta - this.jumpFactor >= 0)) {
+                           this.curyDelta -= this.jumpFactor;
+                           this.jumpDelta -= this.jumpFactor;
+                        } else {
+                           byte var73 = 1;
+                           if (this.curyDelta - this.jumpFactor <= -64) {
+                              var73 = 2;
+                           }
+
+                           var66 = true;
+                           boolean var70 = false;
+                           if (this.canMove(this.curyOff + 2 + var73, this.curxOff + 3)) {
+                              var62 = this.getRealTile(this.curyOff + 2 + var73, this.curxOff + 3);
+                              if (var62 > 0 && var62 < WALKABLETILE) {
+                                 var70 = true;
+                              }
+
+                              if (this.curxDelta < 0) {
+                                 if (this.canMove(this.curyOff + 2 + var73, this.curxOff + 3 + 1)) {
+                                    var66 = true;
+                                 }
+
+                                 var62 = this.getRealTile(this.curyOff + 2 + var73, this.curxOff + 3 + 1);
+                                 if (var62 > 0 && var62 < WALKABLETILE) {
+                                    var70 = true;
+                                 }
+                              } else if (this.curxDelta > 0) {
+                                 if (this.canMove(this.curyOff + 2 + var73, this.curxOff + 3 - 1)) {
+                                    var66 = true;
+                                 }
+
+                                 var62 = this.getRealTile(this.curyOff + 2 + var73, this.curxOff + 3 - 1);
+                                 if (var62 > 0 && var62 < WALKABLETILE) {
+                                    var70 = true;
+                                 }
+                              } else {
+                                 var66 = true;
+                              }
+                           }
+
+                           if (var66) {
+                              if (var73 == 2) {
+                                 this.changeLoc(1);
+                                 this.climbing = false;
+                              } else {
+                                 this.curyDelta -= this.jumpFactor;
+                              }
+
+                              if (var70) {
+                                 this.curyDelta = 0;
+                                 this.falling = false;
+                                 this.jumping = false;
+                                 this.jumpDelta = 0;
+                                 this.curyDelta = 0;
+                                 this.curCharAnim = 0;
+                                 this.keystrokes[8] = 0;
+                              }
+                           } else {
+                              if (var73 == 2) {
+                                 this.changeLoc(1);
+                                 this.climbing = false;
+                              }
+
+                              this.curyDelta = 0;
+                              this.falling = false;
+                              this.jumping = false;
+                              this.climbing = false;
+                              this.jumpDelta = 0;
+                              this.curyDelta = 0;
+                              this.curCharAnim = 0;
+                              this.keystrokes[8] = 0;
+                           }
+                        }
+
+                        if (this.jumping && (this.caughtVine(this.curyOff + 2, this.curxOff + 3) || this.curxDelta > 32 && this.caughtVine(this.curyOff + 2, this.curxOff + 3 - 1) || this.curxDelta < -32 && this.caughtVine(this.curyOff + 2, this.curxOff + 3 + 1)) && !this.climbing) {
+                           this.curCharAnim = 0;
+                           this.pdir = this.dir;
+                           this.dir = 0;
+                           this.falling = false;
+                           this.jumping = false;
+                           this.keystrokes[8] = 0;
+                           this.jumpDelta = 0;
+                           this.curyDelta = 0;
+                           if (!this.caughtVine(this.curyOff + 2, this.curxOff + 3)) {
+                              if (this.curxDelta > 32) {
+                                 this.changeLoc(2);
+                              } else if (this.curxDelta < -32) {
+                                 this.changeLoc(3);
+                              }
+                           }
+
+                           this.climbing = true;
+                           this.curxDelta = 0;
+                        }
+                     }
+                  }
+
+                  if (this.curxDelta < 0) {
+                     if (!this.canMove(this.curyOff + 2 + 1, this.curxOff + 3 + 1)) {
+                        this.curxDelta = 0;
+                     }
+                  } else if (this.curxDelta > 0 && !this.canMove(this.curyOff + 2 + 1, this.curxOff + 3 - 1)) {
+                     this.curxDelta = 0;
+                  }
+
+                  if (var51 && !this.jumping && !this.climbing) {
+                     if (this.dir != 2 && this.dir != 4) {
+                        this.dir = 7;
+                     } else {
+                        this.dir = 4;
+                     }
+
+                     if (this.charticks % 8 == 0) {
+                        this.curCharAnim = (this.curCharAnim + 1) % this.charAnimIdleRt.length;
+                     }
+                  }
+
+                  if (this.hurting) {
+                     ++this.hurtticks;
+                     if (this.hurtticks > 20) {
+                        this.hurtticks = 0;
+                        this.hurting = false;
+                     }
+                  }
+
+                  ++this.eticks;
+
+                  for(var50 = 0; this.enemies != null && var50 < this.enemies.length && !this.displayOptions; ++var50) {
+                     if (this.enemies[var50][6] == 0 && this.eticks % 2 == 0) {
+                        this.moveEnemy(var50, 4);
+                        this.enemies[var50][4] = (this.enemies[var50][4] + 1) % this.enemies[var50][5];
+                     } else if (this.enemies[var50][6] == 1 && this.eticks % 4 == 0) {
+                        this.moveEnemy(var50, 4);
+                        this.enemies[var50][4] = (this.enemies[var50][4] + 1) % this.enemies[var50][5];
+                     }
+                  }
+
+                  ++this.cointicks;
+                  if (this.cointicks > 2) {
+                     this.cointicks = 0;
+                     this.curCoinAnim = (this.curCoinAnim + 1) % 6;
+                     this.curMapAnim = (this.curMapAnim + 1) % 7;
+                     this.curRubyAnim = (this.curRubyAnim + 1) % 6;
+                     this.curEnergyAnim = (this.curEnergyAnim + 1) % 5;
+                  }
+
+                  if (!this.displayOptions) {
+                     this.paint(this.getGraphics());
+                  }
+               }
+               break;
+            case 4:
+            case 15:
+            default:
+               System.out.println("Unknown state! " + this.state);
+               break;
+            case 6:
+               ++this.ticks;
+               if (this.ticks > 15) {
+                  this.ticks = 0;
+                  ++this.introStep;
+                  if (this.introStep >= 350) {
+                     this.state = 5;
+                     this.displayOptions = true;
+                  }
+
+                  this.paint(this.getGraphics());
+               }
+               break;
+            case 8:
+               ++this.ilticks;
+               if (this.ilticks > 200) {
+                  this.ilticks = 0;
+                  if (this.loadLevelStr != null) {
+                     this.initGame(this.loadLevelStr);
+                     this.loadLevelStr = null;
+                  } else {
+                     this.initGame();
+                  }
+
+                  if (this.restoreStr != null) {
+                     this.restoreLevel();
+                  }
+               } else {
+                  this.paint(this.getGraphics());
+               }
+               break;
+            case 9:
+               ++this.loadticks;
+               if (this.loadticks > 300) {
+                  this.loadticks = 0;
+               }
+
+               if (this.loadedPieces < MAXLOADSTEPS && this.mt.checkID(this.loadedPieces, true)) {
+                  if ((this.mt.statusID(this.loadedPieces, true) & 4) != 0 || (this.mt.statusID(this.loadedPieces, true) & 2) != 0) {
+                     System.out.println("Possible problem with image " + this.loadedPieces + "; status=" + this.mt.statusID(this.loadedPieces, false));
+                     this.imageLoadingError = true;
+                     this.state = 14;
+                     this.repaint();
+                     return;
+                  }
+
+                  ++this.loadedPieces;
+                  if (this.loadedPieces >= MAXLOADSTEPS) {
+                     this.loadedImages = true;
+                  }
+               }
+
+               this.paint(this.getGraphics());
+               break;
+            case 10:
+               if (this.saveError == -1) {
+                  try {
+                     var53 = this.getSaveString();
+                     var51 = false;
+                     URL var63 = new URL(this.getDocumentBase(), "/cgi-bin/global/getset.cgi?type=set&name=" + this.gameCookie + "&value=" + var53);
+                     DataInputStream var64 = new DataInputStream(var63.openStream());
+
+                     while(true) {
+                        String var67 = var64.readLine();
+                        if (var67 == null) {
+                           break;
+                        }
+
+                        if (var67.startsWith("%%Set%%" + this.gameCookie + "%%" + var53 + "%%")) {
+                           var51 = true;
+                           break;
+                        }
+                     }
+
+                     if (!var51) {
+                        System.out.println("Problem with getting save string from cookie");
+                        this.saveError = 0;
+                        this.repaint();
+                     } else {
+                        this.state = 2;
+                     }
+                  } catch (Exception var33) {
+                     System.out.println("Exception " + var33 + " thrown when trying to save game");
+                     this.saveError = 1;
+                     this.repaint();
+                  }
+               }
+               break;
+            case 11:
+               if (this.restoreError == -1) {
+                  try {
+                     var53 = null;
+                     String var49 = null;
+                     var58 = false;
+                     var60 = new URL(this.getDocumentBase(), "/cgi-bin/global/getset.cgi?type=get&name=" + this.gameCookie + "&rand=" + System.currentTimeMillis());
+                     DataInputStream var65 = new DataInputStream(var60.openStream());
+
+                     while(true) {
+                        var49 = var65.readLine();
+                        if (var49 == null) {
+                           break;
+                        }
+
+                        if (var49.startsWith("%%Get%%" + this.gameCookie)) {
+                           var53 = new String(var49.substring(var49.indexOf("%%Get%%" + this.gameCookie + "%%") + 16));
+                           if (!var53.startsWith("%%")) {
+                              var58 = true;
+                           } else {
+                              System.out.println("No previously saved game");
+                           }
+                           break;
+                        }
+                     }
+
+                     if (!var58) {
+                        System.out.println("Couldn't read in cookie correctly: " + var49);
+                        this.restoreError = 0;
+                        this.repaint();
+                     } else {
+                        this.score = Integer.parseInt(var53.substring(0, var53.indexOf(":")));
+                        String var72 = var53.substring(var53.indexOf(":") + 1);
+                        this.level = Integer.parseInt(var72.substring(0, 1));
+                        if (this.currentTileset != this.level / 3) {
+                           this.loadLevel(this.level);
+                        } else {
+                           this.ilticks = 0;
+                           this.state = 8;
+                        }
+
+                        this.restoreStr = var72.substring(1);
+                     }
+                  } catch (Exception var34) {
+                     System.out.println("Exception " + var34 + " thrown when trying to load game");
+                     this.restoreError = 1;
+                     this.repaint();
+                  }
+               }
+               break;
+            case 12:
+               ++this.creditticks;
+               if (this.creditticks > 10) {
+                  ++this.creditOff;
+                  this.creditticks = 0;
+                  if (this.creditOff > 600) {
+                     this.creditOff = 0;
+                     if (this.prevstate == 5) {
+                        this.displayOptions = true;
+                     }
+
+                     if (this.prevstate == 16) {
+                        if (this.useHighScores) {
+                           this.highscoresDone = false;
+                           this.submitScore = false;
+                           this.submittedScore = false;
+                           this.dailyScoreBoard.show();
+                           this.scoreBoard.show();
+                           this.state = 16;
+                        } else {
+                           this.introStep = 0;
+                           this.ticks = 0;
+                           this.state = 5;
+                           this.displayOptions = true;
+                        }
+                     } else {
+                        this.state = this.prevstate;
+                     }
+                  }
+
+                  this.paint(this.getGraphics());
+               }
+               break;
+            case 13:
+               ++this.mapticks;
+               if (this.mapticks > 20) {
+                  this.mapticks = 0;
+               }
+
+               this.paint(this.getGraphics());
+               break;
+            case 14:
+               return;
+            case 16:
+               if (!this.highscoresDone) {
+                  this.hsStatus = "Getting your username...";
+                  this.repaint();
+                  if (this.userName == null) {
+                     this.userName = this.getUserName();
+                  }
+
+                  if (this.userName != null) {
+                     this.hsStatus = "Getting scores...";
+                  } else {
+                     this.hsStatus = "Couldn't find your name! Getting scores...";
+                  }
+
+                  this.repaint();
+                  this.getScores();
+                  this.updateBoards(true);
+                  this.highscoresDone = true;
+                  this.hsStatus = "";
+                  this.repaint();
+               } else if (this.submitScore) {
+                  if (this.userName != null) {
+                     this.hsStatus = "Submitting your score...";
+                     this.repaint();
+                     this.setScore();
+                     this.updateBoards(false);
+                     this.hsStatus = "";
+                     this.repaint();
+                  } else {
+                     this.hsStatus = "No username found! Can't submit score...";
+                     this.repaint();
+                  }
+
+                  this.submittedScore = true;
+                  this.submitScore = false;
+               }
+               break;
+            case 17:
+               String var55;
+               URLConnection var61;
+               DataInputStream var68;
+               String var71;
+               if (!this.gottenLevels) {
+                  var55 = "/cgi-bin/global/mapeditor.cgi?action=getnames&dbname=" + this.gameCookie;
+                  this.levelList.clear();
+
+                  try {
+                     var60 = new URL(this.getDocumentBase(), var55);
+                     var61 = var60.openConnection();
+                     var68 = new DataInputStream(var61.getInputStream());
+                     var71 = null;
+
+                     while(true) {
+                        if ((var71 = var68.readLine()) == null) {
+                           break label2047;
+                        }
+
+                        if (var71.equals("%%DONE%%")) {
+                           this.gottenLevels = true;
+                           this.levelSuccess = true;
+                           this.repaint();
+                           break label2047;
+                        }
+
+                        this.levelList.addItem(var71);
+                     }
+                  } catch (Exception var35) {
+                     this.gottenLevels = true;
+                     this.levelSuccess = false;
+                     System.out.println("Error getting levels: " + var35.getMessage());
+                     this.repaint();
+                  }
+               } else if (this.getSelectedLevel && !this.levelDone) {
+                  var55 = "/cgi-bin/global/mapeditor.cgi?action=load&dbname=" + this.gameCookie + "&levelname=" + URLEncoder.encode(this.levelList.getSelectedItem());
+
+                  try {
+                     var60 = new URL(this.getDocumentBase(), var55);
+                     var61 = var60.openConnection();
+                     var68 = new DataInputStream(var61.getInputStream());
+                     var71 = null;
+
+                     while((var71 = var68.readLine()) != null) {
+                        if (var71.equals("%%DONE%%")) {
+                           this.loadLevelSuccess = true;
+                           break;
+                        }
+
+                        if (var71.startsWith("##")) {
+                           this.loadLevelStr = var71;
+                        }
+                     }
+                  } catch (Exception var32) {
+                     this.loadLevelSuccess = false;
+                     System.out.println("Error loading level: " + var32.getMessage());
+                     this.repaint();
+                  }
+
+                  this.levelDone = true;
+                  if (this.loadLevelSuccess) {
+                     this.levelList.hide();
+                     this.levelChoice.hide();
+                     this.displayOptions = false;
+                     this.level = this.levelChoice.getSelectedIndex() * 3;
+                     this.loadLevel(this.level);
+                  }
+               }
+               break;
+            case 18:
+               ++this.winticks;
+               this.paint(this.getGraphics());
+               if (this.winticks > 700) {
+                  if (this.useHighScores) {
+                     this.highscoresDone = false;
+                     this.submitScore = false;
+                     this.submittedScore = false;
+                     this.dailyScoreBoard.show();
+                     this.scoreBoard.show();
+                     this.state = 16;
+                  } else {
+                     this.introStep = 0;
+                     this.ticks = 0;
+                     this.state = 5;
+                     this.displayOptions = true;
+                  }
+               }
+            }
+
+            try {
+               if (this.smartSleep) {
+                  Thread.sleep((long)Math.max(0, (int)(15L - (System.currentTimeMillis() - this.startTime))));
+               } else {
+                  Thread.sleep(15L);
+               }
+            } catch (InterruptedException var29) {
+            }
+         }
+      } catch (Exception var37) {
+         this.state = 14;
+         this.runtimeError = true;
+         this.errorMsg = var37.getMessage();
+         System.out.println("Caught an exception: " + var37.getMessage());
+         var37.printStackTrace();
+         this.repaint();
+         System.out.println("Thread exiting...");
+      }
+   }
+
+   public void changeLoc(int var1) {
+      switch(var1) {
+      case 0:
+         --this.curyOff;
+         this.curyDelta = 0;
+         break;
+      case 1:
+         ++this.curyOff;
+         this.curyDelta = 0;
+         break;
+      case 2:
+         this.climbing = false;
+         --this.curxOff;
+         this.curxDelta = 0;
+         --this.bgDelta;
+         break;
+      case 3:
+         this.climbing = false;
+         ++this.curxOff;
+         this.curxDelta = 0;
+         ++this.bgDelta;
+      }
+
+      if (this.curyOff > this.YTILES - 4) {
+         if (!this.invincible) {
+            this.life -= 25;
+         }
+
+         if (this.life <= 0) {
+            if (this.soundOn && this.sndEfx[3] != null) {
+               AudioPlayer.player.stop(this.sndEfx[3]);
+               this.sndEfx[3].reset();
+               AudioPlayer.player.start(this.sndEfx[3]);
+            }
+
+            this.loadticks = 0;
+            this.state = 7;
+            this.repaint();
+         } else {
+            this.curyOff = this.curyStart;
+            this.curxOff = this.curxStart;
+            this.curyDelta = 0;
+            this.curxDelta = 0;
+            this.dir = 3;
+            this.falling = false;
+            this.jumping = false;
+            if (!this.invincible) {
+               this.hurting = true;
+            }
+
+         }
+      } else {
+         int[] var10000;
+         int var10001;
+         if (this.isSpecialPiece(this.curyOff + 2, this.curxOff + 3, 1)) {
+            var10000 = this.tileMap[this.curyOff + 2];
+            var10001 = this.curxOff + 3;
+            var10000[var10001] %= this.SPECIALMULT;
+            if (this.soundOn && this.sndEfx[0] != null) {
+               AudioPlayer.player.stop(this.sndEfx[0]);
+               this.sndEfx[0].reset();
+               AudioPlayer.player.start(this.sndEfx[0]);
+            }
+
+            this.score += 100;
+            this.scoreticks = this.ticks + 100;
+            ++this.coins;
+         }
+
+         if (this.isEnemy(this.curyOff + 2, this.curxOff + 3) && !this.hurting) {
+            if (!this.invincible) {
+               this.life -= 15;
+            }
+
+            if (this.life <= 0) {
+               if (this.soundOn && this.sndEfx[3] != null) {
+                  AudioPlayer.player.stop(this.sndEfx[3]);
+                  this.sndEfx[3].reset();
+                  AudioPlayer.player.start(this.sndEfx[3]);
+               }
+
+               this.loadticks = 0;
+               this.state = 7;
+            } else if (!this.invincible) {
+               this.hurting = true;
+            }
+         }
+
+         if (this.isSpecialPiece(this.curyOff + 2, this.curxOff + 3, 5) && this.coins == this.MAXCOINS) {
+            this.score += 200;
+            this.scoreticks = this.ticks + 100;
+            this.loadLevel(++this.level);
+         }
+
+         if (this.isSpecialPiece(this.curyOff + 2, this.curxOff + 3, 6)) {
+            var10000 = this.tileMap[this.curyOff + 2];
+            var10001 = this.curxOff + 3;
+            var10000[var10001] %= this.SPECIALMULT;
+            this.mapIcon = true;
+            this.score += 80;
+            this.scoreticks = this.ticks + 100;
+         }
+
+         if (this.isSpecialPiece(this.curyOff + 2, this.curxOff + 3, 7)) {
+            if (this.soundOn && this.sndEfx[5] != null) {
+               AudioPlayer.player.stop(this.sndEfx[5]);
+               this.sndEfx[5].reset();
+               AudioPlayer.player.start(this.sndEfx[5]);
+            }
+
+            var10000 = this.tileMap[this.curyOff + 2];
+            var10001 = this.curxOff + 3;
+            var10000[var10001] %= this.SPECIALMULT;
+            this.score += 50;
+            this.scoreticks = this.ticks + 100;
+         }
+
+         if (this.isSpecialPiece(this.curyOff + 2, this.curxOff + 3, 8)) {
+            var10000 = this.tileMap[this.curyOff + 2];
+            var10001 = this.curxOff + 3;
+            var10000[var10001] %= this.SPECIALMULT;
+            this.life += 25;
+            if (this.life > 100) {
+               this.life = 100;
+            }
+         }
+
+      }
+   }
+
+   public synchronized void updateScreen() {
+      this.repaint();
+
+      try {
+         this.wait();
+      } catch (InterruptedException var1) {
+      }
+   }
+
+   public boolean isEnemy(int var1, int var2) {
+      for(int var3 = 0; this.enemies != null && var3 < this.enemies.length; ++var3) {
+         int var4 = this.enemies[var3][0] + (this.enemies[var3][2] >> 6);
+         int var5 = this.enemies[var3][1] + (this.enemies[var3][3] >> 6);
+         if (var1 == var5 && var2 == var4) {
+            if (this.dir == 3 && this.enemies[var3][2] % 64 > this.curxOff + 70) {
+               return false;
+            }
+
+            if (this.dir == 2 && this.enemies[var3][2] % 64 < this.curxOff) {
+               return false;
+            }
+
+            if (this.soundOn && this.sndEfx[4] != null) {
+               AudioPlayer.player.stop(this.sndEfx[4]);
+               this.sndEfx[4].reset();
+               AudioPlayer.player.start(this.sndEfx[4]);
+            }
+
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   public boolean jumpIntersect(int var1, int var2) {
+      if (var1 >= 0 && var1 < this.YTILES && var2 >= 0 && var2 < this.XTILES) {
+         int var3 = this.getRealTile(var1, var2);
+         return var3 > 0 && var3 < WALKABLETILE;
+      } else {
+         return false;
+      }
+   }
+
+   public boolean caughtVine(int var1, int var2) {
+      if (var1 >= 0 && var1 < this.YTILES && var2 >= 0 && var2 < this.XTILES) {
+         int var3 = this.getRealTile(var1, var2);
+         return var3 >= CLIMBINGTILE;
+      } else {
+         return false;
+      }
+   }
+
+   public boolean fallThrough(int var1, int var2) {
+      if (var1 >= 0 && var1 < this.YTILES && var2 >= 0 && var2 < this.XTILES) {
+         int var3 = this.getRealTile(var1, var2);
+         return var3 == 0 || var3 > WALKABLETILE;
+      } else {
+         return true;
+      }
+   }
+
+   public boolean isSpecialPiece(int var1, int var2, int var3) {
+      if (var1 >= 0 && var1 < this.YTILES && var2 >= 0 && var2 < this.XTILES) {
+         return this.tileMap[var1][var2] >= this.SPECIALMULT && this.tileMap[var1][var2] / this.SPECIALMULT == var3;
+      } else {
+         return false;
+      }
+   }
+
+   public void moveEnemy(int var1, int var2) {
+      int var3 = this.enemies[var1][0] + (this.enemies[var1][2] >> 6);
+      int var4 = this.enemies[var1][1] + (this.enemies[var1][3] >> 6);
+      int var5 = -1;
+      int[] var10000;
+      if ((this.enemies[var1][7] & 2) == 2) {
+         if (this.enemies[var1][8] == 3) {
+            ++var4;
+            ++var3;
+            if (var3 >= 0 && var3 < this.XTILES && var4 >= 0 && var4 < this.YTILES) {
+               var5 = this.tileMap[var4][var3] % this.SPECIALMULT;
+            }
+
+            if (var5 < WALKABLETILE && var5 > 0) {
+               var10000 = this.enemies[var1];
+               var10000[2] += var2;
+            } else {
+               var10000 = this.enemies[var1];
+               var10000[2] -= var2;
+               this.enemies[var1][8] = 2;
+               if (var3 >= this.curxOff && var3 <= this.curxOff + 7 && var4 >= this.curyOff && var4 <= this.curyOff + 4 && this.soundOn && this.sndEfx[1] != null) {
+                  AudioPlayer.player.stop(this.sndEfx[1]);
+                  this.sndEfx[1].reset();
+                  AudioPlayer.player.start(this.sndEfx[1]);
+               }
+            }
+         } else {
+            ++var4;
+            if (var3 >= 0 && var3 < this.XTILES && var4 >= 0 && var4 < this.YTILES) {
+               var5 = this.tileMap[var4][var3] % this.SPECIALMULT;
+            }
+
+            if (var5 < WALKABLETILE && var5 > 0) {
+               var10000 = this.enemies[var1];
+               var10000[2] -= var2;
+            } else {
+               var10000 = this.enemies[var1];
+               var10000[2] += var2;
+               this.enemies[var1][8] = 3;
+               if (var3 >= this.curxOff && var3 <= this.curxOff + 7 && var4 >= this.curyOff && var4 <= this.curyOff + 4 && this.soundOn && this.sndEfx[1] != null) {
+                  AudioPlayer.player.stop(this.sndEfx[1]);
+                  this.sndEfx[1].reset();
+                  AudioPlayer.player.start(this.sndEfx[1]);
+               }
+            }
+         }
+      } else if ((this.enemies[var1][7] & 1) != 1 && (this.enemies[var1][7] & 32) != 32 && (this.enemies[var1][7] & 64) == 64) {
+         if (this.enemies[var1][8] == 0) {
+            if (var3 >= 0 && var3 < this.XTILES && var4 >= 0 && var4 < this.YTILES) {
+               var5 = this.tileMap[var4][var3] % this.SPECIALMULT;
+            }
+
+            if (var5 >= CLIMBINGTILE) {
+               var10000 = this.enemies[var1];
+               var10000[3] -= var2;
+            } else {
+               this.enemies[var1][8] = 1;
+               if (var3 >= this.curxOff && var3 <= this.curxOff + 7 && var4 >= this.curyOff && var4 <= this.curyOff + 4 && this.soundOn && this.sndEfx[2] != null) {
+                  AudioPlayer.player.stop(this.sndEfx[2]);
+                  this.sndEfx[2].reset();
+                  AudioPlayer.player.start(this.sndEfx[2]);
+               }
+            }
+         } else {
+            ++var4;
+            if (var3 >= 0 && var3 < this.XTILES && var4 >= 0 && var4 < this.YTILES) {
+               var5 = this.tileMap[var4][var3] % this.SPECIALMULT;
+            }
+
+            if (var5 >= CLIMBINGTILE) {
+               var10000 = this.enemies[var1];
+               var10000[3] += var2;
+            } else {
+               this.enemies[var1][8] = 0;
+               if (var3 >= this.curxOff && var3 <= this.curxOff + 7 && var4 >= this.curyOff && var4 <= this.curyOff + 4 && this.soundOn && this.sndEfx[2] != null) {
+                  AudioPlayer.player.stop(this.sndEfx[2]);
+                  this.sndEfx[2].reset();
+                  AudioPlayer.player.start(this.sndEfx[2]);
+               }
+            }
+         }
+      }
+
+      var3 = this.enemies[var1][0] + (this.enemies[var1][2] >> 6);
+      var4 = this.enemies[var1][1] + (this.enemies[var1][3] >> 6);
+      if (this.curxOff + 3 == var3 && this.curyOff + 2 == var4 && !this.hurting) {
+         if (!this.invincible) {
+            this.life -= 10;
+         }
+
+         if (this.life <= 0) {
+            if (this.soundOn && this.sndEfx[3] != null) {
+               AudioPlayer.player.stop(this.sndEfx[3]);
+               this.sndEfx[3].reset();
+               AudioPlayer.player.start(this.sndEfx[3]);
+            }
+
+            this.loadticks = 0;
+            this.state = 7;
+            this.repaint();
+            return;
+         }
+
+         if (!this.invincible) {
+            this.hurting = true;
+            if (this.soundOn && this.sndEfx[4] != null) {
+               AudioPlayer.player.stop(this.sndEfx[4]);
+               this.sndEfx[4].reset();
+               AudioPlayer.player.start(this.sndEfx[4]);
+            }
+         }
+      }
+
+   }
+
+   public boolean canMove(int var1, int var2) {
+      int var3 = this.getRealTile(var1, var2);
+      if ((var3 < 0 || var3 >= WALKABLETILE) && var3 < CLIMBINGTILE) {
+         if (var3 >= WALKABLETILE && var3 < CLIMBINGTILE) {
+            for(int var4 = var1 + 1; var4 < this.YTILES; ++var4) {
+               int var5 = this.getRealTile(var4, var2);
+               if (var5 == 0 || var5 >= CLIMBINGTILE) {
+                  return false;
+               }
+
+               if (var5 > 0 && var5 < WALKABLETILE) {
+                  return true;
+               }
+            }
+         }
+
+         return false;
+      } else {
+         return true;
+      }
+   }
+
+   public int getRealTile(int var1, int var2) {
+      if (var1 >= 0 && var1 < this.YTILES && var2 >= 0 && var2 < this.XTILES) {
+         int var3 = this.tileMap[var1][var2];
+         if (var3 >= this.SPECIALMULT) {
+            var3 %= this.SPECIALMULT;
+         }
+
+         return var3;
+      } else {
+         return 0;
+      }
+   }
+
+   public boolean handleEvent(Event var1) {
+      if (var1.id == 1005) {
+         if (this.state == 2 && !this.displayOptions) {
+            this.displayOptions = true;
+            this.repaint();
+            return true;
+         }
+
+         if (this.miniGameOn && this.miniGameNum == 1) {
+            this.ppaused = true;
+            return true;
+         }
+      } else if (var1.id == 501) {
+         if (this.state == 2 && !this.displayOptions) {
+            if (var1.x < 45 && var1.y < 47) {
+               if (var1.shiftDown() && this.showmap) {
+                  this.state = 13;
+               } else if (var1.controlDown()) {
+                  this.loadLevel(++this.level);
+               } else {
+                  this.displayOptions = true;
+               }
+
+               this.repaint();
+            }
+
+            if (this.mapIcon && this.mapRect.inside(var1.x, var1.y)) {
+               this.state = 13;
+               this.repaint();
+            }
+
+            return true;
+         }
+      } else if (var1.id != 502) {
+         if (var1.id != 403 && var1.id != 401) {
+            if (var1.id == 402 || var1.id == 404) {
+               if (var1.id == 402) {
+                  var1.key = Character.toLowerCase((char)var1.key);
+               }
+
+               if (this.state == 2 && !this.displayOptions) {
+                  if (var1.key != this.upkey && var1.key != 1004) {
+                     if (var1.key != this.downkey && var1.key != 1005) {
+                        if (var1.key != this.left && var1.key != 1006) {
+                           if (var1.key != this.right && var1.key != 1007) {
+                              if (var1.key == this.jumpkey) {
+                                 this.jumpKeyLetGo = true;
+                                 this.keystrokes[8] = 0;
+                              }
+                           } else {
+                              this.keystrokes[3] = 0;
+                           }
+                        } else {
+                           this.keystrokes[2] = 0;
+                        }
+                     } else {
+                        this.keystrokes[1] = 0;
+                     }
+                  } else {
+                     this.keystrokes[0] = 0;
+                  }
+               }
+            }
+         } else {
+            if (this.miniGameOn && this.miniGameNum == 1 && !this.pmoving) {
+               if (var1.key == 1006 && this.pxloc > 0) {
+                  this.pmovedir = 2;
+                  this.pmoving = true;
+               } else if (var1.key == 1007) {
+                  this.pmovedir = 3;
+                  this.pmoving = true;
+               } else if (var1.key == 1004 && this.pyloc > 0) {
+                  this.pmovedir = 0;
+                  this.pmoving = true;
+               } else if (var1.key == 1005 && this.pyloc < 9) {
+                  this.pmovedir = 1;
+                  this.pmoving = true;
+               }
+
+               return true;
+            }
+
+            if (var1.id == 401) {
+               var1.key = Character.toLowerCase((char)var1.key);
+            }
+
+            if (this.state == 1) {
+               if (this.keychange != -1) {
+                  if (Character.isDigit((char)var1.key) || Character.isLetter((char)var1.key) || var1.key == 32 || var1.key == 1006 || var1.key == 1007 || var1.key == 1004 || var1.key == 1005) {
+                     if (this.keychange == 0) {
+                        this.left = var1.key;
+                     } else if (this.keychange == 1) {
+                        this.right = var1.key;
+                     } else if (this.keychange == 2) {
+                        this.upkey = var1.key;
+                     } else if (this.keychange == 3) {
+                        this.downkey = var1.key;
+                     } else if (this.keychange == 4) {
+                        this.jumpkey = var1.key;
+                     }
+                  }
+
+                  this.keychange = -1;
+                  this.repaint();
+               }
+
+               return true;
+            }
+
+            if (this.state == 5) {
+               if ((char)var1.key == this.mloadkey[this.loadloc]) {
+                  this.loadloc = (this.loadloc + 1) % this.mloadkey.length;
+                  if (this.loadloc == this.mloadkey.length - 1) {
+                     this.state = 17;
+                     this.paint(this.getGraphics());
+                     this.gottenLevels = false;
+                     this.levelError = false;
+                     this.levelSuccess = false;
+                     this.getSelectedLevel = false;
+                     this.levelDone = false;
+                     this.levelList.show();
+                     this.levelChoice.show();
+                  }
+               } else {
+                  this.loadloc = 0;
+               }
+            } else if (this.state == 2 && !this.displayOptions) {
+               if ((char)var1.key == this.mcoinkey[this.coinloc]) {
+                  this.coinloc = (this.coinloc + 1) % this.mcoinkey.length;
+                  if (this.coinloc == this.mcoinkey.length - 1) {
+                     this.coins = this.MAXCOINS;
+                  }
+               } else {
+                  this.coinloc = 0;
+               }
+
+               if ((char)var1.key == this.minvkey[this.invloc]) {
+                  this.invloc = (this.invloc + 1) % this.minvkey.length;
+                  if (this.invloc == this.minvkey.length - 1) {
+                     this.invincible = true;
+                  }
+               } else {
+                  this.invloc = 0;
+               }
+
+               if ((char)var1.key == this.mmapkey[this.maploc]) {
+                  this.maploc = (this.maploc + 1) % this.mmapkey.length;
+                  if (this.maploc == this.mmapkey.length - 1) {
+                     this.showmap = true;
+                  }
+               } else {
+                  this.maploc = 0;
+               }
+
+               if (var1.key != this.upkey && var1.key != 1004) {
+                  if (var1.key != this.downkey && var1.key != 1005) {
+                     if (var1.key != this.left && var1.key != 1006) {
+                        if (var1.key != this.right && var1.key != 1007) {
+                           if (var1.key == this.jumpkey) {
+                              if (this.jumpKeyLetGo) {
+                                 this.jumpKeyLetGo = false;
+                                 this.keystrokes[8] = 1;
+                              }
+                           } else if (var1.key == 27 || var1.key == 112) {
+                              this.displayOptions = true;
+                              this.repaint();
+                           }
+                        } else {
+                           this.keystrokes[3] = 1;
+                           this.keystrokes[2] = 0;
+                        }
+                     } else {
+                        this.keystrokes[2] = 1;
+                        this.keystrokes[3] = 0;
+                     }
+                  } else {
+                     this.keystrokes[1] = 1;
+                     this.keystrokes[0] = 0;
+                  }
+               } else {
+                  this.keystrokes[0] = 1;
+                  this.keystrokes[1] = 0;
+               }
+
+               return true;
+            }
+         }
+      } else {
+         if (this.displayOptions && (this.optionsRect.inside(var1.x, var1.y) && this.state == 2 || this.titleRect.inside(var1.x, var1.y) && this.state == 5)) {
+            this.displayOptions = false;
+            boolean var9 = false;
+            int var10;
+            byte var11;
+            if (this.state == 2) {
+               var10 = var1.y - this.optionsRect.y;
+               if (var10 < this.optionsRect.height / 5) {
+                  var11 = 0;
+               } else if (var10 < 2 * this.optionsRect.height / 5) {
+                  var11 = 1;
+               } else if (var10 < 3 * this.optionsRect.height / 5) {
+                  var11 = 2;
+               } else if (var10 < 4 * this.optionsRect.height / 5) {
+                  var11 = 4;
+               } else {
+                  var11 = 3;
+               }
+            } else {
+               var10 = var1.y - this.titleRect.y;
+               if (var10 < this.titleRect.height / 4) {
+                  var11 = 0;
+               } else if (var10 < this.titleRect.height / 2) {
+                  var11 = 2;
+               } else if (var10 < 3 * this.titleRect.height / 4) {
+                  var11 = 1;
+               } else {
+                  var11 = 3;
+               }
+            }
+
+            switch(var11) {
+            case 0:
+               if (this.state != 2) {
+                  this.level = 0;
+                  this.score = 0;
+                  if (var1.controlDown()) {
+                     this.level = 3;
+                  }
+
+                  if (var1.shiftDown()) {
+                     this.level = 6;
+                  }
+
+                  if (this.currentTileset != this.level / 3) {
+                     this.loadLevel(this.level);
+                  } else {
+                     this.ilticks = 0;
+                     this.state = 8;
+                  }
+
+                  this.repaint();
+               }
+               break;
+            case 1:
+               this.prevstate = this.state;
+               this.state = 1;
+               break;
+            case 2:
+               this.prevstate = this.state;
+               this.state = 3;
+               break;
+            case 3:
+               if (this.state == 2) {
+                  this.state = 5;
+                  this.displayOptions = true;
+               } else {
+                  this.restoreError = -1;
+                  this.restoreStr = null;
+                  this.state = 11;
+               }
+               break;
+            case 4:
+               if (this.state == 2) {
+                  this.saveError = -1;
+                  this.state = 10;
+               }
+               break;
+            default:
+               this.displayOptions = true;
+            }
+
+            this.repaint();
+            return true;
+         }
+
+         if (this.state == 2) {
+            int var10002 = this.keystrokes[6]++;
+            return true;
+         }
+
+         if (this.state == 17) {
+            if (this.getLevelRect.inside(var1.x, var1.y)) {
+               if (this.getSelectedLevel && !this.loadLevelSuccess) {
+                  this.state = 5;
+                  this.displayOptions = true;
+                  this.levelList.hide();
+                  this.levelChoice.hide();
+                  this.repaint();
+               } else if (this.gottenLevels && this.levelSuccess) {
+                  if (this.levelList.getSelectedItem() != null) {
+                     this.getSelectedLevel = true;
+                     this.repaint();
+                  }
+               } else if (this.gottenLevels && !this.levelSuccess) {
+                  this.state = 5;
+                  this.levelList.hide();
+                  this.levelChoice.hide();
+                  this.repaint();
+               }
+            }
+
+            return true;
+         }
+
+         if (this.state == 6) {
+            this.state = 5;
+            this.displayOptions = true;
+            this.repaint();
+            return true;
+         }
+
+         if (this.state == 0) {
+            if (this.loadedPieces >= MAXLOADSTEPS && var1.y > 128) {
+               this.tileImg = null;
+               this.bgImg = null;
+               this.objectImg = null;
+               this.miniGameOn = false;
+               System.gc();
+               this.state = 5;
+               this.displayOptions = true;
+               this.repaint();
+               return true;
+            }
+         } else {
+            if (this.state == 8) {
+               if (this.ilticks < 200) {
+                  if (this.loadLevelStr != null) {
+                     this.initGame(this.loadLevelStr);
+                     this.loadLevelStr = null;
+                  } else {
+                     this.initGame();
+                  }
+
+                  if (this.restoreStr != null) {
+                     this.restoreLevel();
+                  }
+               }
+
+               return true;
+            }
+
+            if (this.state == 9) {
+               if (this.loadedPieces >= MAXLOADSTEPS && var1.y > 128) {
+                  this.tileImg = null;
+                  this.bgImg = null;
+                  this.objectImg = null;
+                  this.miniGameOn = false;
+                  System.gc();
+                  this.ilticks = 0;
+                  this.currentTileset = this.level / 3;
+                  this.state = 8;
+                  this.repaint();
+                  return true;
+               }
+            } else {
+               if (this.state == 3) {
+                  if (var1.shiftDown() && this.creditRect.inside(var1.x, var1.y)) {
+                     this.creditOff = 0;
+                     this.state = 12;
+                  } else {
+                     this.state = this.prevstate;
+                     if (this.state == 5) {
+                        this.displayOptions = true;
+                     }
+                  }
+
+                  this.repaint();
+                  return true;
+               }
+
+               if (this.state == 12) {
+                  if (this.prevstate == 5) {
+                     this.displayOptions = true;
+                  }
+
+                  if (this.prevstate == 16) {
+                     if (this.useHighScores) {
+                        this.highscoresDone = false;
+                        this.submitScore = false;
+                        this.submittedScore = false;
+                        this.dailyScoreBoard.show();
+                        this.scoreBoard.show();
+                        this.state = 16;
+                     } else {
+                        this.introStep = 0;
+                        this.ticks = 0;
+                        this.state = 5;
+                        this.displayOptions = true;
+                     }
+                  } else {
+                     this.state = this.prevstate;
+                  }
+
+                  this.repaint();
+                  return true;
+               }
+
+               if (this.state == 10 && this.saveError != -1) {
+                  this.state = 2;
+                  return true;
+               }
+
+               if (this.state == 13) {
+                  this.state = 2;
+                  return true;
+               }
+
+               if (this.state == 1) {
+                  if (var1.y > 240) {
+                     this.keychange = -1;
+                     this.state = this.prevstate;
+                     if (this.state == 5) {
+                        this.displayOptions = true;
+                        this.repaint();
+                     }
+                  } else if (this.changeRect.inside(var1.x, var1.y)) {
+                     this.keychange = (var1.y - this.changeRect.y) / (this.changeRect.height / 5);
+                  } else if (this.onRect.inside(var1.x, var1.y)) {
+                     this.soundOn = true;
+                  } else if (this.offRect.inside(var1.x, var1.y)) {
+                     this.soundOn = false;
+                  }
+
+                  this.repaint();
+                  return true;
+               }
+
+               if (this.state == 11) {
+                  this.state = 5;
+                  this.restoreError = -1;
+                  this.displayOptions = true;
+                  this.repaint();
+                  return true;
+               }
+
+               if (this.state == 7) {
+                  if (this.joinRect.inside(var1.x, var1.y)) {
+                     try {
+                        this.getAppletContext().showDocument(new URL("http://jas.disney.go.com/cgi-bin/Click.cgi?code=18287&url=https://goregister.disney.go.com/ms/blast/signup?plan%3DCBANN_0_39"), "_self");
+                     } catch (Exception var7) {
+                        System.out.println("Exception: " + var7.getMessage());
+                     }
+                  } else if (this.previewRect.inside(var1.x, var1.y)) {
+                     try {
+                        this.getAppletContext().showDocument(new URL("http://jas.disney.go.com/cgi-bin/Click.cgi?code=18371&url=http://disney.go.com/preview/index.html"), "_self");
+                     } catch (Exception var6) {
+                        System.out.println("Exception: " + var6.getMessage());
+                     }
+                  } else {
+                     this.introStep = 0;
+                     this.ticks = 0;
+                     this.state = 5;
+                     this.displayOptions = true;
+                  }
+
+                  this.repaint();
+                  return true;
+               }
+
+               if (this.state == 16) {
+                  if (this.highscoresDone && !this.submitScore) {
+                     if (this.highscoresDone) {
+                        if (this.submitRect.inside(var1.x, var1.y)) {
+                           this.submitScore = true;
+                        } else if (this.playagainRect.inside(var1.x, var1.y)) {
+                           this.introStep = 0;
+                           this.ticks = 0;
+                           this.dailyScoreBoard.hide();
+                           this.scoreBoard.hide();
+                           this.state = 5;
+                           this.displayOptions = true;
+                           this.repaint();
+                        }
+                     }
+
+                     return true;
+                  }
+
+                  return true;
+               }
+
+               if (this.state == 14 && !this.imageLoadingError) {
+                  this.introStep = 0;
+                  this.ticks = 0;
+                  this.state = 5;
+                  this.displayOptions = true;
+                  if (this.t == null || this.t != null && !this.t.isAlive()) {
+                     this.t = new Thread(this);
+                     this.t.start();
+                  }
+
+                  this.repaint();
+                  return true;
+               }
+            }
+         }
+
+         if (this.miniGameOn) {
+            if (this.miniGameNum == 0) {
+               if (var1.shiftDown() && this.gotAcross) {
+                  Vector var2 = this.explosions;
+                  synchronized(var2){}
+
+                  try {
+                     this.explosions.addElement(new Rectangle(var1.x, var1.y, 0, 0));
+                  } catch (Throwable var8) {
+                     throw var8;
+                  }
+
+                  return true;
+               }
+
+               if (!this.jumperJumping) {
+                  this.jumperticks = 0;
+                  this.jumperJumping = true;
+                  if (this.jumperstuck == 2) {
+                     this.gotAcross = true;
+                  }
+               }
+
+               return true;
+            }
+
+            if (this.miniGameNum == 1) {
+               if (this.pwin > 10 && var1.shiftDown()) {
+                  this.miniGameNum = 0;
+               }
+
+               this.ppaused = false;
+               return true;
+            }
+         }
+      }
+
+      return true;
+   }
+
+   public void loadLevel(int var1) {
+      if (var1 < 1) {
+         if (this.currentTileset != var1 / 3) {
+            MAXLOADSTEPS = 0;
+            this.loadedPieces = 0;
+            this.loadedImages = false;
+            this.miniGameOn = true;
+            this.miniGameNum = 1;
+            this.g2init = false;
+            this.tileImg = this.getImage(this.getDocumentBase(), this.getParameter("tileimg" + (var1 / 3 + 1)));
+            this.bgImg = this.getImage(this.getDocumentBase(), this.getParameter("bgimg" + (var1 / 3 + 1)));
+            this.mt = new MediaTracker(this);
+            this.mt.addImage(this.tileImg, MAXLOADSTEPS++);
+            this.mt.addImage(this.bgImg, MAXLOADSTEPS++);
+            ImageProducer var2 = this.tileImg.getSource();
+
+            int var4;
+            int var5;
+            for(int var3 = 0; var3 < 40; ++var3) {
+               var4 = var3 % 8 * 64;
+               var5 = var3 / 8 * 64;
+               this.tiles[var3] = this.createImage(new FilteredImageSource(var2, new CropImageFilter(var4, var5, 64, 64)));
+               this.mt.addImage(this.tiles[var3], MAXLOADSTEPS++);
+            }
+
+            var2 = this.bgImg.getSource();
+
+            for(var4 = 0; var4 < 3; ++var4) {
+               var5 = var4 * 256;
+               byte var6 = 0;
+               this.bgtiles[var4] = this.createImage(new FilteredImageSource(var2, new CropImageFilter(var5, var6, 256, 256)));
+               this.mt.addImage(this.bgtiles[var4], MAXLOADSTEPS++);
+            }
+
+            this.mt.checkAll(true);
+            this.state = 9;
+         } else {
+            this.ilticks = 0;
+            this.state = 8;
+         }
+      } else {
+         this.state = 7;
+      }
+
+      this.paint(this.getGraphics());
+   }
+
+   public void drawCenteredClippedString(Graphics var1, Vector var2, int var3, int var4) {
+      int var5 = 0;
+      int var6 = var2.size() / 2;
+
+      for(Enumeration var7 = var2.elements(); var7.hasMoreElements(); ++var5) {
+         String var8 = (String)var7.nextElement();
+         var1.drawString(var8, var3 - this.regFontMet.stringWidth(var8) / 2, var4 - var6 * (this.regFontMet.getHeight() - 2) / 2 + var5 * (this.regFontMet.getHeight() - 2));
+      }
+
+   }
+
+   public void drawKey(Graphics var1, int var2, int var3, int var4) {
+      if (var2 == 32) {
+         var1.drawString("SPACE", var3, var4);
+      } else if (var2 == 1006) {
+         var1.drawString("LEFT", var3, var4);
+      } else if (var2 == 1007) {
+         var1.drawString("RIGHT", var3, var4);
+      } else if (var2 == 1004) {
+         var1.drawString("UP", var3, var4);
+      } else if (var2 == 1005) {
+         var1.drawString("DOWN", var3, var4);
+      } else {
+         var1.drawString(String.valueOf(Character.toUpperCase((char)var2)), var3, var4);
+      }
+   }
+
+   public void drawKeyCent(Graphics var1, int var2, int var3, int var4) {
+      var1.setFont(this.regBoldFont);
+      if (var2 == 32) {
+         var1.drawString("SPACE", var3 - this.regBoldFontMet.stringWidth("SPACE") / 2, var4);
+      } else if (var2 == 1006) {
+         var1.drawString("LEFT", var3 - this.regBoldFontMet.stringWidth("LEFT") / 2, var4);
+      } else if (var2 == 1007) {
+         var1.drawString("RIGHT", var3 - this.regBoldFontMet.stringWidth("RIGHT") / 2, var4);
+      } else if (var2 == 1004) {
+         var1.drawString("UP", var3 - this.regBoldFontMet.stringWidth("UP") / 2, var4);
+      } else if (var2 == 1005) {
+         var1.drawString("DOWN", var3 - this.regBoldFontMet.stringWidth("DOWN") / 2, var4);
+      } else {
+         var1.drawString(String.valueOf(Character.toUpperCase((char)var2)), var3 - 5, var4);
+      }
+   }
+
+   public void update(Graphics var1) {
+      this.paint(var1);
+   }
+
+   public synchronized void paint(Graphics var1) {
+      try {
+         if (this.offG == null) {
+            this.offImg = this.createImage(WIDTH, HEIGHT + 128);
+            this.offG = this.offImg.getGraphics();
+            this.levelList.hide();
+            this.levelChoice.hide();
+            if (this.useHighScores) {
+               this.scoreBoard.hide();
+               this.dailyScoreBoard.hide();
+            }
+         }
+
+         int var2;
+         String var16;
+         int var6;
+         int var7;
+         int var8;
+         int var9;
+         int var12;
+         label555:
+         switch(this.state) {
+         case 0:
+            this.levelList.hide();
+            this.levelChoice.hide();
+            if (this.useHighScores) {
+               this.scoreBoard.hide();
+               this.dailyScoreBoard.hide();
+            }
+
+            this.offG.setColor(Color.black);
+            this.offG.fillRect(0, 0, WIDTH, HEIGHT);
+            this.offG.setFont(this.loadFont);
+            this.offG.setColor(Color.gray);
+            if (this.loadedPieces < MAXLOADSTEPS) {
+               this.offG.drawString("LOADING", (WIDTH >> 1) - (this.loadFontMet.stringWidth("LOADING") >> 1), 192);
+               var2 = 200 / MAXLOADSTEPS;
+               if (var2 < 1) {
+                  var2 = 1;
+               }
+
+               this.offG.drawRect((WIDTH >> 1) - (MAXLOADSTEPS >> 1) * var2, 195, MAXLOADSTEPS * var2, 5);
+               this.offG.fillRect((WIDTH >> 1) - (MAXLOADSTEPS >> 1) * var2, 195, this.loadedPieces * var2, 5);
+            } else if (this.loadticks % 20 > 10) {
+               this.offG.drawString("click here to play", (WIDTH >> 1) - (this.loadFontMet.stringWidth("click here to play") >> 1), 192);
+            }
+
+            this.offG.setFont(this.regFont);
+            if (!this.miniGameOn) {
+               this.offG.drawString("Preparing wait-time entertainment...", 5, 60);
+            }
+            break;
+         case 1:
+            this.offG.setColor(Color.black);
+            this.offG.fillRect(0, 0, WIDTH, HEIGHT);
+            this.offG.drawImage(this.titles[3], 89, 0, this);
+            this.offG.setColor(Color.yellow);
+            if (this.soundOn) {
+               this.offG.drawRect(this.onRect.x, this.onRect.y, this.onRect.width, this.onRect.height);
+            } else {
+               this.offG.drawRect(this.offRect.x, this.offRect.y, this.offRect.width, this.offRect.height);
+            }
+
+            this.offG.setColor(Color.white);
+            this.drawKeyCent(this.offG, this.left, this.changeRect.x - 30, this.changeRect.y + 17);
+            this.drawKeyCent(this.offG, this.right, this.changeRect.x - 30, this.changeRect.y + 17 + 30);
+            this.drawKeyCent(this.offG, this.upkey, this.changeRect.x - 30, this.changeRect.y + 17 + 60);
+            this.drawKeyCent(this.offG, this.downkey, this.changeRect.x - 30, this.changeRect.y + 17 + 90);
+            this.drawKeyCent(this.offG, this.jumpkey, this.changeRect.x - 30, this.changeRect.y + 17 + 120);
+            this.offG.setColor(Color.black);
+            if (this.keychange >= 0) {
+               this.offG.fillRect(this.changeRect.x, this.changeRect.y + this.keychange * 29, this.changeRect.width + 5, 30);
+               this.offG.setColor(Color.gray);
+               this.offG.drawString("enter key", this.changeRect.x, this.changeRect.y + this.keychange * 30 + 17);
+               this.offG.setColor(Color.white);
+               this.offG.drawString("enter key", this.changeRect.x + 1, this.changeRect.y + this.keychange * 30 + 18);
+            }
+            break;
+         case 2:
+            var6 = this.bgDelta / 256 % 4;
+            this.offG.drawImage(this.bgtiles[var6], -this.bgDelta, 0, this);
+            this.offG.drawImage(this.bgtiles[(var6 + 1) % 4], 256 - this.bgDelta, 0, this);
+            if (this.bgDelta != 0) {
+               this.offG.drawImage(this.bgtiles[(var6 + 2) % 4], 512 - this.bgDelta, 0, this);
+            }
+
+            this.offG.setColor(Color.white);
+
+            for(var7 = this.curyOff - 1; var7 < this.curyOff + 5; ++var7) {
+               for(var8 = this.curxOff - 1; var8 < this.curxOff + 8; ++var8) {
+                  if (var7 >= 0 && var7 < this.YTILES && var8 >= 0 && var8 < this.XTILES && this.tileMap[var7][var8] > 0) {
+                     var9 = this.tileMap[var7][var8];
+                     if (var9 % this.SPECIALMULT > 0) {
+                        this.offG.drawImage(this.tiles[var9 % this.SPECIALMULT - 1], (var8 - this.curxOff << 6) + this.curxDelta, (var7 - this.curyOff << 6) + this.curyDelta, this);
+                     }
+
+                     if (var9 >= this.SPECIALMULT) {
+                        if (var9 / this.SPECIALMULT == 1) {
+                           this.offG.drawImage(this.coinspin[this.curCoinAnim], (var8 - this.curxOff << 6) + this.curxDelta + 17, (var7 - this.curyOff << 6) + this.curyDelta + 20, this);
+                        } else if (var9 / this.SPECIALMULT == 5) {
+                           if (this.coins == this.MAXCOINS) {
+                              this.offG.drawImage(this.objects[this.openDoorNum], (var8 - this.curxOff << 6) + this.curxDelta, (var7 - this.curyOff << 6) + this.curyDelta, this);
+                           } else {
+                              this.offG.drawImage(this.objects[this.closedDoorNum], (var8 - this.curxOff << 6) + this.curxDelta, (var7 - this.curyOff << 6) + this.curyDelta, this);
+                           }
+                        } else if (var9 / this.SPECIALMULT == 6) {
+                           this.offG.drawImage(this.mapspin[this.curMapAnim], (var8 - this.curxOff << 6) + this.curxDelta + 17, (var7 - this.curyOff << 6) + this.curyDelta + 20, this);
+                        } else if (var9 / this.SPECIALMULT == 7) {
+                           this.offG.drawImage(this.rubyspin[this.curRubyAnim], (var8 - this.curxOff << 6) + this.curxDelta + 17, (var7 - this.curyOff << 6) + this.curyDelta + 20, this);
+                        } else if (var9 / this.SPECIALMULT == 8) {
+                           this.offG.drawImage(this.energy[this.curEnergyAnim], (var8 - this.curxOff << 6) + this.curxDelta + 22, (var7 - this.curyOff << 6) + this.curyDelta + 12, this);
+                        }
+                     }
+                  }
+               }
+            }
+
+            for(var7 = 0; this.enemies != null && var7 < this.enemies.length; ++var7) {
+               var8 = this.enemies[var7][0] + (this.enemies[var7][2] >> 6);
+               var9 = this.enemies[var7][1] + (this.enemies[var7][3] >> 6);
+               if (var9 >= this.curyOff - 1 && var9 <= this.curyOff + 5 && var8 >= this.curxOff - 1 && var8 <= this.curxOff + 8) {
+                  switch(this.enemies[var7][6]) {
+                  case 0:
+                     if (this.enemies[var7][8] == 0) {
+                        this.offG.drawImage(this.objects[this.enemyImgRef[0] + this.enemies[var7][4] + this.enemies[var7][5]], (this.enemies[var7][0] - this.curxOff << 6) + this.curxDelta + 22, (this.enemies[var7][1] - this.curyOff << 6) + this.curyDelta + this.enemies[var7][3], this);
+                     } else {
+                        this.offG.drawImage(this.objects[this.enemyImgRef[0] + this.enemies[var7][4]], (this.enemies[var7][0] - this.curxOff << 6) + this.curxDelta + 22, (this.enemies[var7][1] - this.curyOff << 6) + this.curyDelta + this.enemies[var7][3], this);
+                     }
+                     break;
+                  case 1:
+                     int var10 = this.enemies[var7][4];
+                     if (var10 >= 3) {
+                        var10 = 1;
+                     }
+
+                     if (this.enemies[var7][8] == 2) {
+                        this.offG.drawImage(this.objects[this.enemyImgRef[1] + var10], (this.enemies[var7][0] - this.curxOff << 6) + this.curxDelta + this.enemies[var7][2] - 18, (this.enemies[var7][1] - this.curyOff << 6) + this.curyDelta - 7, this);
+                     } else {
+                        this.offG.drawImage(this.objects[this.enemyImgRef[1] + this.enemies[var7][5] - 1 + var10], (this.enemies[var7][0] - this.curxOff << 6) + this.curxDelta + this.enemies[var7][2] - 18, (this.enemies[var7][1] - this.curyOff << 6) + this.curyDelta - 7, this);
+                     }
+                  }
+               }
+            }
+
+            if (!this.hurting || this.hurtticks % 4 >= 2) {
+               if (!this.jumping) {
+                  if (this.climbing) {
+                     if (this.dir == 0) {
+                        this.offG.drawImage(this.objects[this.charAnimUp[this.curCharAnim % 4]], 189, 121, this);
+                     } else {
+                        this.offG.drawImage(this.objects[this.charAnimDn[this.curCharAnim % 4]], 189, 121, this);
+                     }
+                  } else if (this.dir == 2) {
+                     this.offG.drawImage(this.objects[this.charAnimLt[this.curCharAnim % 4]], 188, 137, this);
+                  } else if (this.dir == 3) {
+                     this.offG.drawImage(this.objects[this.charAnimRt[this.curCharAnim % 4]], 187, 137, this);
+                  } else if (this.dir == 4) {
+                     this.offG.drawImage(this.objects[this.charAnimIdleLt[this.curCharAnim % 2]], 188, 141, this);
+                  } else {
+                     this.offG.drawImage(this.objects[this.charAnimIdleRt[this.curCharAnim % 2]], 188, 141, this);
+                  }
+               } else if (this.dir != 2 && this.dir != 4 && (!this.climbing || this.pdir != 2 && this.pdir != 4)) {
+                  if (this.dir == 3 || this.dir == 7 || this.dir == 0 || this.dir == 1 || this.climbing && (this.pdir == 2 || this.pdir == 4)) {
+                     this.offG.drawImage(this.objects[this.charAnimJumpRt[this.curCharAnim % 2]], 197, 137, this);
+                  }
+               } else {
+                  this.offG.drawImage(this.objects[this.charAnimJumpLt[this.curCharAnim % 2]], 188, 137, this);
+               }
+            }
+
+            var7 = this.coins;
+            var8 = 0;
+            byte var20 = 16;
+            byte var21 = 56;
+            short var11 = 226;
+            this.offG.setColor(Color.black);
+            this.offG.drawImage(this.coinspin[this.curCoinAnim], 13, var11, this);
+            this.offG.drawImage(this.numbers[10], 40, var11, this);
+            if (var7 > 99) {
+               this.offG.drawImage(this.numbers[var7 / 100], var21 + var8 * var20, var11, this);
+               ++var8;
+               var7 %= 100;
+            }
+
+            if (var7 > 9) {
+               this.offG.drawImage(this.numbers[var7 / 10], var21 + var8 * var20, var11, this);
+               ++var8;
+               var7 %= 10;
+            }
+
+            this.offG.drawImage(this.numbers[var7], var21 + var8 * var20, var11, this);
+            ++var8;
+            this.offG.drawImage(this.numbers[11], var21 + var8 * var20, var11, this);
+            ++var8;
+            var7 = this.MAXCOINS;
+            if (var7 >= 100) {
+               this.offG.drawImage(this.numbers[var7 / 100], var21 + var8 * var20, var11, this);
+               ++var8;
+               var7 %= 100;
+            }
+
+            if (var7 >= 10) {
+               this.offG.drawImage(this.numbers[var7 / 10], var21 + var8 * var20, var11, this);
+               ++var8;
+               var7 %= 10;
+            }
+
+            this.offG.drawImage(this.numbers[var7], var21 + var8 * var20, var11, this);
+            this.offG.setColor(Color.black);
+            this.offG.fillRect(333, 229, 113, 24);
+            this.offG.drawImage(this.objects[this.statusBarNum], 333, 229, this);
+            this.offG.setColor(Color.pink);
+            this.offG.fillRect(338, 235, 100, 11);
+            if (this.hurting && this.hurtticks % 4 < 2) {
+               this.offG.setColor(Color.white);
+            } else {
+               this.offG.setColor(Color.red);
+            }
+
+            this.offG.fillRect(338, 235, this.life, 11);
+            this.offG.drawImage(this.objects[this.pauseBtnNum], 0, 0, this);
+            if (this.mapIcon) {
+               this.offG.drawImage(this.mapspin[this.curMapAnim], this.mapRect.x, this.mapRect.y, this);
+            }
+
+            this.offG.drawImage(this.numbers[this.score % 100000 / 10000], (WIDTH >> 1) - 48, 0, this);
+            this.offG.drawImage(this.numbers[this.score % 10000 / 1000], (WIDTH >> 1) - 32, 0, this);
+            this.offG.drawImage(this.numbers[this.score % 1000 / 100], (WIDTH >> 1) - 16, 0, this);
+            this.offG.drawImage(this.numbers[this.score % 100 / 10], WIDTH >> 1, 0, this);
+            this.offG.drawImage(this.numbers[this.score % 10], (WIDTH >> 1) + 16, 0, this);
+            break;
+         case 3:
+            this.offG.setColor(Color.black);
+            this.offG.fillRect(0, 0, WIDTH, HEIGHT);
+            this.offG.drawImage(this.titles[4], 0, 0, this);
+            this.offG.setFont(this.regBoldFont);
+            this.offG.setColor(Color.gray);
+            this.drawKey(this.offG, this.left, 139, 18);
+            this.drawKey(this.offG, this.right, 146, 40);
+            this.drawKey(this.offG, this.upkey, 264, 18);
+            this.drawKey(this.offG, this.downkey, 284, 40);
+            this.drawKey(this.offG, this.jumpkey, 382, 18);
+            this.offG.setColor(Color.white);
+            this.drawKey(this.offG, this.left, 138, 17);
+            this.drawKey(this.offG, this.right, 145, 39);
+            this.drawKey(this.offG, this.upkey, 263, 17);
+            this.drawKey(this.offG, this.downkey, 283, 39);
+            this.drawKey(this.offG, this.jumpkey, 381, 17);
+            this.offG.setColor(Color.gray);
+            this.offG.setFont(this.regFont);
+            this.offG.drawString("v. 1.24", 410, 254);
+         case 4:
+         case 15:
+         default:
+            break;
+         case 5:
+            this.offG.setColor(Color.black);
+            this.offG.fillRect(0, 0, WIDTH, HEIGHT);
+            this.offG.drawImage(this.titles[0], 35, 19, this);
+            break;
+         case 6:
+            this.offG.setColor(Color.black);
+            this.offG.fillRect(0, 0, WIDTH, HEIGHT);
+            this.offG.setFont(this.scrollFont);
+
+            for(var2 = 0; var2 < this.introVectors[0].size(); ++var2) {
+               var16 = (String)this.introVectors[0].elementAt(var2);
+               int var18 = HEIGHT - 35 + var2 * this.scrollFontMet.getHeight() - this.introStep;
+               if (var18 > 0 && var18 < HEIGHT + this.scrollFontMet.getHeight()) {
+                  int var19 = 255 - Math.round((float)Math.abs((HEIGHT >> 1) - var18) * (255.0F / (float)(HEIGHT >> 1)));
+                  var6 = 255 - Math.round((float)Math.abs((HEIGHT >> 1) - var18) * (255.0F / (float)(HEIGHT >> 1)));
+                  var7 = 255 - Math.round((float)Math.abs((HEIGHT >> 1) - var18) * (255.0F / (float)(HEIGHT >> 1)));
+                  if (var19 > 255) {
+                     var19 = 255;
+                  }
+
+                  if (var19 < 0) {
+                     var19 = 0;
+                  }
+
+                  if (var6 > 255) {
+                     var6 = 255;
+                  }
+
+                  if (var6 < 0) {
+                     var6 = 0;
+                  }
+
+                  if (var7 > 255) {
+                     var7 = 255;
+                  }
+
+                  if (var7 < 0) {
+                     var7 = 0;
+                  }
+
+                  this.offG.setColor(new Color(var7, var19, var6));
+                  this.offG.drawString(var16, (WIDTH >> 1) - (this.scrollFontMet.stringWidth(var16) >> 1), var18);
+               }
+            }
+
+            this.offG.setFont(this.regFont);
+            this.offG.setColor(Color.black);
+            this.offG.fillRect((WIDTH >> 1) - (this.regFontMet.stringWidth("(click to skip intro)") >> 1) - 5, HEIGHT - 15, this.regFontMet.stringWidth("(click to skip intro)") + 10, 15);
+            this.offG.setColor(Color.white);
+            this.offG.drawString("(click to skip intro)", (WIDTH >> 1) - (this.regFontMet.stringWidth("(click to skip intro)") >> 1), HEIGHT - 3);
+            break;
+         case 7:
+            this.offG.setColor(Color.black);
+            this.offG.fillRect(0, 0, WIDTH, HEIGHT);
+            this.offG.drawImage(this.titles[2], 35, 19, this);
+            break;
+         case 8:
+            this.offG.setColor(Color.black);
+            this.offG.fillRect(0, 0, WIDTH, HEIGHT);
+            if (this.ilticks < 50) {
+               this.offG.drawImage(this.levels[0], -56 + this.ilticks * 4, 108, this);
+               this.offG.drawImage(this.levels[this.level / 3 + 1], 226, -92 + this.ilticks * 4, this);
+               this.offG.drawImage(this.levels[4], 439 - this.ilticks * 4, 116, this);
+               this.offG.drawImage(this.levels[this.level % 3 + 1], 253, 308 - this.ilticks * 4, this);
+            } else {
+               this.offG.drawImage(this.levels[0], 144, 108, this);
+               this.offG.drawImage(this.levels[this.level / 3 + 1], 226, 108, this);
+               this.offG.drawImage(this.levels[4], 239, 116, this);
+               this.offG.drawImage(this.levels[this.level % 3 + 1], 253, 108, this);
+            }
+            break;
+         case 9:
+            this.offG.setColor(Color.black);
+            this.offG.fillRect(0, 0, WIDTH, HEIGHT);
+            this.offG.setFont(this.loadFont);
+            this.offG.setColor(Color.gray);
+            if (this.loadedPieces < MAXLOADSTEPS) {
+               this.offG.drawString("LOADING WORLD " + (this.level / 3 + 1), (WIDTH >> 1) - (this.loadFontMet.stringWidth("LOADING WORLD " + (this.level / 3 + 1)) >> 1), 192);
+               var12 = 200 / MAXLOADSTEPS;
+               if (var12 < 1) {
+                  var12 = 1;
+               }
+
+               this.offG.drawRect((WIDTH >> 1) - (MAXLOADSTEPS >> 1) * var12, 195, MAXLOADSTEPS * var12, 5);
+               this.offG.fillRect((WIDTH >> 1) - (MAXLOADSTEPS >> 1) * var12, 195, this.loadedPieces * var12, 5);
+            } else if (this.loadticks % 20 > 10) {
+               this.offG.drawString("click here to play", (WIDTH >> 1) - (this.loadFontMet.stringWidth("click here to play") >> 1), 192);
+            }
+            break;
+         case 10:
+            this.offG.setColor(Color.black);
+            this.offG.fillRect(0, 0, WIDTH, HEIGHT);
+            this.offG.setFont(this.loadFont);
+            this.offG.setColor(Color.gray);
+            this.offG.drawString("Saving Game...", 22, 42);
+            this.offG.setColor(Color.white);
+            this.offG.drawString("Saving Game...", 20, 40);
+            this.offG.setColor(Color.gray);
+            this.offG.setFont(this.regBoldFont);
+            if (this.saveError == 0) {
+               this.offG.drawString("Could not save game, click to continue...", 22, 82);
+               this.offG.setColor(Color.white);
+               this.offG.drawString("Could not save game, click to continue...", 20, 80);
+            } else if (this.saveError == 1) {
+               this.offG.drawString("Could not save game, click to continue....", 22, 82);
+               this.offG.setColor(Color.white);
+               this.offG.drawString("Could not save game, click to continue....", 20, 80);
+            }
+            break;
+         case 11:
+            this.offG.setColor(Color.black);
+            this.offG.fillRect(0, 0, WIDTH, HEIGHT);
+            this.offG.setFont(this.loadFont);
+            this.offG.setColor(Color.gray);
+            this.offG.drawString("Restoring Game...", 22, 42);
+            this.offG.setColor(Color.white);
+            this.offG.drawString("Restoring Game...", 20, 40);
+            this.offG.setColor(Color.gray);
+            this.offG.setFont(this.regBoldFont);
+            if (this.restoreError == 0) {
+               this.offG.drawString("Couldn't find a saved game, click to continue...", 22, 82);
+               this.offG.setColor(Color.white);
+               this.offG.drawString("Couldn't find a saved game, click to continue...", 20, 80);
+            } else if (this.restoreError == 1) {
+               this.offG.drawString("Couldn't find a saved game, click to continue....", 22, 82);
+               this.offG.setColor(Color.white);
+               this.offG.drawString("Couldn't find a saved game, click to continue....", 20, 80);
+            }
+            break;
+         case 12:
+            this.offG.drawImage(this.bgtiles[0], -(this.creditOff >> 1), 0, this);
+            this.offG.drawImage(this.bgtiles[1], 256 - (this.creditOff >> 1), 0, this);
+            this.offG.drawImage(this.bgtiles[2], 512 - (this.creditOff >> 1), 0, this);
+            var2 = 0;
+
+            while(true) {
+               if (var2 >= 24) {
+                  break label555;
+               }
+
+               if (HEIGHT - 35 + var2 * 20 - this.creditOff > 0 && HEIGHT - 35 + var2 * 20 - this.creditOff < HEIGHT + 20) {
+                  if (this.creditStr[var2].indexOf(":") != -1) {
+                     this.offG.setColor(Color.gray);
+                     this.offG.setFont(this.regBoldFont);
+                     this.offG.drawString(this.creditStr[var2], 22, HEIGHT - 35 + var2 * 20 - this.creditOff + 2);
+                     this.offG.setColor(Color.white);
+                     this.offG.setFont(this.regBoldFont);
+                     this.offG.drawString(this.creditStr[var2], 20, HEIGHT - 35 + var2 * 20 - this.creditOff);
+                  } else {
+                     this.offG.setColor(Color.gray);
+                     this.offG.setFont(this.regFont);
+                     this.offG.drawString(this.creditStr[var2], 22, HEIGHT - 40 + var2 * 20 - this.creditOff + 2);
+                     this.offG.setColor(Color.white);
+                     this.offG.setFont(this.regFont);
+                     this.offG.drawString(this.creditStr[var2], 20, HEIGHT - 40 + var2 * 20 - this.creditOff);
+                  }
+               }
+
+               ++var2;
+            }
+         case 13:
+            this.offG.setColor(Color.black);
+            this.offG.fillRect(0, 0, WIDTH, HEIGHT);
+            var2 = WIDTH / this.XTILES;
+            if (this.YTILES * var2 > HEIGHT - 70) {
+               var2 = (HEIGHT - 70) / this.YTILES;
+            }
+
+            int var3 = (WIDTH >> 1) - (this.XTILES >> 1) * var2;
+            byte var4 = 0;
+            Color[] var5 = this.level1;
+            if (this.level / 3 == 1) {
+               var5 = this.level2;
+            } else if (this.level / 3 == 2) {
+               var5 = this.level3;
+            }
+
+            for(var6 = 0; var6 < this.YTILES; ++var6) {
+               for(var7 = 0; var7 < this.XTILES; ++var7) {
+                  if (this.tileMap[var6][var7] > 0) {
+                     var8 = this.tileMap[var6][var7];
+                     if (var8 % 100 > 0) {
+                        var9 = var8 % 100;
+                        if (var9 > 0 && var9 < WALKABLETILE) {
+                           this.offG.setColor(var5[0]);
+                           this.offG.fillRect(var3 + var7 * var2, var4 + var6 * var2, var2, var2);
+                           this.offG.setColor(var5[1]);
+                           this.offG.drawLine(var3 + var7 * var2, var4 + var6 * var2, var3 + var7 * var2 + var2, var4 + var6 * var2);
+                        } else if (var9 >= WALKABLETILE && var9 < CLIMBINGTILE - 4) {
+                           this.offG.setColor(var5[0]);
+                           this.offG.fillRect(var3 + var7 * var2, var4 + var6 * var2, var2, var2);
+                        } else if (var9 == WALKABLETILE && this.level / 3 == 2) {
+                           this.offG.setColor(var5[0]);
+                           this.offG.fillRect(var3 + var7 * var2, var4 + var6 * var2, var2, var2);
+                        } else if (var9 >= CLIMBINGTILE - 4 && var9 < CLIMBINGTILE - 1 && this.level / 3 < 2) {
+                           this.offG.setColor(var5[2]);
+                           this.offG.fillRect(var3 + var7 * var2, var4 + var6 * var2, var2, var2);
+                        } else if (var9 == CLIMBINGTILE - 2 && this.level / 3 == 2) {
+                           this.offG.setColor(var5[2]);
+                           this.offG.fillRect(var3 + var7 * var2, var4 + var6 * var2, var2, var2);
+                        } else if (var9 >= CLIMBINGTILE - 1) {
+                           this.offG.setColor(var5[3]);
+                           this.offG.drawLine(var3 + var7 * var2 + var2 / 2, var4 + var6 * var2, var3 + var7 * var2 + var2 / 2, var4 + var6 * var2 + var2);
+                        }
+                     }
+
+                     if (var8 >= this.SPECIALMULT) {
+                        var9 = var8 / this.SPECIALMULT;
+                        if (var9 == 1 && this.mapticks % 10 <= 5) {
+                           this.offG.setColor(Color.yellow);
+                           this.offG.fillRect(var3 + var7 * var2, var4 + var6 * var2, var2, var2);
+                        }
+                     }
+                  }
+               }
+            }
+
+            if (this.mapticks % 20 <= 10) {
+               this.offG.setColor(Color.white);
+               this.offG.fillRect(var3 + (this.curxOff + 3) * var2, var4 + (this.curyOff + 2) * var2, var2, var2);
+            }
+
+            this.offG.setColor(Color.white);
+            this.offG.fillRect(20, HEIGHT - 50, 30, 30);
+            this.offG.fillRect(70, HEIGHT - 43, 20, 5);
+            this.offG.fillRect(70, HEIGHT - 35, 20, 5);
+            this.offG.drawImage(this.objects[this.charAnimIdleRt[0]], 100, HEIGHT - 60, this);
+            this.offG.setColor(Color.yellow);
+            this.offG.fillRect(WIDTH - 200 + 20, HEIGHT - 50, 30, 30);
+            this.offG.fillRect(WIDTH - 200 + 70, HEIGHT - 43, 20, 5);
+            this.offG.fillRect(WIDTH - 200 + 70, HEIGHT - 35, 20, 5);
+            this.offG.drawImage(this.coinspin[0], WIDTH - 200 + 100, HEIGHT - 50, this);
+            break;
+         case 14:
+            this.offG.setColor(Color.black);
+            this.offG.fillRect(0, 0, WIDTH, HEIGHT);
+            this.offG.setColor(Color.gray);
+            if (this.runtimeError) {
+               this.offG.setFont(this.loadFont);
+               this.offG.drawString("Uh-Oh!", (WIDTH >> 1) - (this.loadFontMet.stringWidth("Uh-Oh!") >> 1), 128);
+               this.offG.setFont(this.regFont);
+               this.offG.drawString("You found a bug with our game!", 15, 150);
+               this.offG.drawString("Click here to re-start the game, or if that doesn't work,", 15, 165);
+               this.offG.drawString("try restarting your browser and loading the game again.", 15, 180);
+               if (this.errorMsg != null) {
+                  this.offG.drawString("Error message: " + this.errorMsg, 15, 200);
+               }
+            } else if (this.imageLoadingError) {
+               this.offG.setFont(this.loadFont);
+               this.offG.drawString("Uh-Oh!", (WIDTH >> 1) - (this.loadFontMet.stringWidth("Uh-Oh!") >> 1), 128);
+               this.offG.setFont(this.regFont);
+               this.offG.drawString("There was a problem loading the graphics for this game.", 15, 150);
+               this.offG.drawString("In order to be able to properly load this game, you must quit and load this page again.", 15, 165);
+               this.offG.drawString("For best performance, close all other applications.", 15, 180);
+            } else {
+               this.offG.setColor(Color.white);
+               this.offG.fillRect(0, 0, WIDTH, HEIGHT);
+               this.offG.setFont(this.loadFont);
+               this.offG.drawString("Uh-Oh!", (WIDTH >> 1) - (this.loadFontMet.stringWidth("Uh-Oh!") >> 1), 128);
+               this.offG.setFont(this.regFont);
+               this.offG.drawString("You found a bug with our game!", 15, 150);
+               this.offG.drawString("Click here to re-start the game, or if that doesn't work,", 15, 165);
+               this.offG.drawString("try restarting your browser and loading the game again.", 15, 180);
+            }
+            break;
+         case 16:
+            this.offG.setColor(Color.black);
+            this.offG.fillRect(0, 0, WIDTH, HEIGHT);
+            this.offG.setFont(this.highscoreFont);
+            this.offG.drawImage(this.highscoreImgs[0], 0, 0, this);
+            if (!this.submitScore && !this.submittedScore) {
+               this.offG.drawImage(this.highscoreImgs[1], 319, 73, this);
+            }
+
+            if (!this.hsStatus.equals("")) {
+               this.offG.setColor(Color.gray);
+               this.offG.fill3DRect(0, 0, this.highscoreFontMet.stringWidth(this.hsStatus) + 12, 16, true);
+               this.offG.setColor(Color.white);
+               this.offG.drawString(this.hsStatus, 6, 12);
+            }
+
+            this.offG.setColor(Color.white);
+            if (this.userName != null) {
+               this.offG.drawString(String.valueOf(this.userName), 79, 88);
+            } else {
+               this.offG.drawString("<No Name>", 79, 88);
+            }
+
+            this.offG.drawString(String.valueOf(this.score), 234, 88);
+            break;
+         case 17:
+            this.offG.setColor(Color.black);
+            this.offG.fillRect(0, 0, WIDTH, HEIGHT);
+            this.offG.setColor(Color.gray);
+            this.offG.drawString("Load Level", 5, 30);
+            if (!this.gottenLevels) {
+               this.offG.drawString("Getting level names...", 5, HEIGHT - 5);
+            } else if (!this.getSelectedLevel) {
+               this.offG.fillRect(this.getLevelRect.x, this.getLevelRect.y, this.getLevelRect.width, this.getLevelRect.height);
+               if (this.levelSuccess) {
+                  this.offG.drawString("Successfully loaded level names...", 5, HEIGHT - 5);
+                  this.offG.setColor(Color.white);
+                  this.offG.drawString("Load level", this.getLevelRect.x + 10, this.getLevelRect.y + this.getLevelRect.height - 10);
+               } else {
+                  this.offG.drawString("Unable to load level names...", 5, HEIGHT - 5);
+                  this.offG.setColor(Color.white);
+                  this.offG.drawString("Back", this.getLevelRect.x + 10, this.getLevelRect.y + this.getLevelRect.height - 10);
+               }
+            } else if (!this.levelDone) {
+               this.offG.drawString("Loading level...", 5, HEIGHT - 5);
+            } else if (!this.loadLevelSuccess) {
+               this.offG.drawString("Unable to load level...", 5, HEIGHT - 5);
+               this.offG.setColor(Color.white);
+               this.offG.drawString("Back", this.getLevelRect.x + 10, this.getLevelRect.y + this.getLevelRect.height - 10);
+            }
+            break;
+         case 18:
+            this.offG.setColor(Color.black);
+            this.offG.fillRect(0, 0, WIDTH, HEIGHT);
+            int var13;
+            int var14;
+            if (this.winticks < 225) {
+               if (this.winticks < 200) {
+                  this.offG.setColor(Color.white);
+               } else {
+                  this.offG.setColor(new Color(255 - (this.winticks - 200) * 10, 255 - (this.winticks - 200) * 10, 255 - (this.winticks - 200) * 10));
+               }
+
+               for(var12 = 0; var12 < 200; ++var12) {
+                  var13 = this.starfield[var12].x;
+                  var14 = (this.starfield[var12].y - this.winticks * 2 + (HEIGHT << 1)) % HEIGHT;
+                  this.offG.drawLine(var13, var14, var13, var14 + 2);
+               }
+
+               for(var13 = 0; var13 < 10; ++var13) {
+                  this.offG.drawImage(this.coinspin[(var13 + this.winticks) % 6], (WIDTH >> 1) - 13, -300 + var13 * 30 + (this.winticks << 2), this);
+               }
+            } else if (this.winticks < 500) {
+               if (this.winticks >= 250) {
+                  this.offG.setColor(Color.white);
+               } else {
+                  this.offG.setColor(new Color((this.winticks - 225) * 10, (this.winticks - 225) * 10, (this.winticks - 225) * 10));
+               }
+
+               for(var12 = 0; var12 < 200; ++var12) {
+                  var13 = this.starfield[var12].x;
+                  var14 = Math.abs((this.starfield[var12].y + (this.winticks - 225)) % HEIGHT);
+                  this.offG.drawLine(var13, var14, var13, var14 + 2);
+               }
+
+               for(var13 = 0; var13 < 64; ++var13) {
+                  this.offG.drawImage(this.coinspin[2], this.friends[var13], HEIGHT + var13 * 64 - (this.winticks - 250) * 2, this);
+                  if (this.friends[var13] % 2 == 0) {
+                     this.offG.drawImage(this.objects[this.charAnimRt[1 + (this.winticks >> 2) % 2]], this.friends[var13] - 24, HEIGHT + var13 * 64 - (this.winticks - 250) * 2 + 14, this);
+                  } else {
+                     this.offG.drawImage(this.objects[this.charAnimLt[1 + (this.winticks >> 2) % 2]], this.friends[var13] - 24, HEIGHT + var13 * 64 - (this.winticks - 250) * 2 + 14, this);
+                  }
+               }
+            } else {
+               this.offG.setFont(this.loadFont);
+               this.offG.setColor(Color.gray);
+               this.offG.drawString("You did it! Your friends are back again!", (WIDTH >> 1) - this.loadFontMet.stringWidth("You did it! Your friends are back again!") / 2 + 2, (HEIGHT >> 1) - 10 + 2);
+               this.offG.setColor(Color.white);
+               this.offG.drawString("You did it! Your friends are back again!", (WIDTH >> 1) - this.loadFontMet.stringWidth("You did it! Your friends are back again!") / 2, (HEIGHT >> 1) - 10);
+
+               for(var12 = -1; var12 < 7; ++var12) {
+                  var13 = var12 * 72 + (this.winticks - 500) % WIDTH;
+                  this.offG.drawImage(this.objects[this.charAnimRt[(this.winticks >> 2) % this.charAnimRt.length]], var13, HEIGHT >> 1, this);
+               }
+            }
+         }
+
+         if (this.displayOptions && this.state == 2) {
+            this.offG.drawImage(this.titles[1], 152, 32, this);
+         }
+
+         if (this.miniGameOn && this.state != 14) {
+            this.offG.setColor(Color.black);
+            this.offG.fillRect(0, 0, WIDTH, 135);
+            if (this.miniGameNum == 0) {
+               for(var2 = 0; var2 < this.explosions.size(); ++var2) {
+                  Rectangle var17 = (Rectangle)this.explosions.elementAt(var2);
+                  this.offG.setColor(new Color(255 - var17.width * 255 / 30, 0, 0));
+                  this.offG.fillOval(var17.x - (var17.width >> 1), var17.y - (var17.width >> 1), var17.width, var17.width);
+               }
+
+               this.offG.setFont(this.regFont);
+               this.offG.setColor(Color.gray);
+               this.offG.drawString("Play a game while you wait! Try to jump all the way across by clicking the mouse!", 5, 120);
+               if (this.gotAcross) {
+                  this.offG.drawString("Here's a secret! Hold down the SHIFT key and click the mouse on the screen...", 5, 135);
+               }
+
+               this.offG.drawLine(WIDTH >> 2, 0, (WIDTH >> 2) - this.vxloc1, 20 + this.vyloc1);
+               this.offG.drawLine((WIDTH >> 2) - this.vxloc1, 20 + this.vyloc1, (WIDTH >> 2) - this.vxloc1, 70 + this.vyloc1);
+               this.offG.drawLine(WIDTH >> 1, 0, (WIDTH >> 1) - this.vxloc2, 20 + this.vyloc2);
+               this.offG.drawLine((WIDTH >> 1) - this.vxloc2, 20 + this.vyloc2, (WIDTH >> 1) - this.vxloc2, 70 + this.vyloc2);
+               this.offG.drawLine(3 * (WIDTH >> 2), 0, 3 * (WIDTH >> 2) - this.vxloc3, 20 + this.vyloc3);
+               this.offG.drawLine(3 * (WIDTH >> 2) - this.vxloc3, 20 + this.vyloc3, 3 * (WIDTH >> 2) - this.vxloc3, 70 + this.vyloc3);
+               this.offG.setColor(Color.blue);
+               this.offG.fillRect(this.jumperx, this.jumpery, 10, 10);
+            } else if (this.miniGameNum == 1) {
+               for(var2 = 0; var2 < this.numlanes; ++var2) {
+                  if (this.pwin < 10) {
+                     this.offG.setColor(new Color(255 - this.pwin * 23, 255 - this.pwin * 23, 255 - this.pwin * 23));
+                  } else if (this.g2ticks % this.pwin < 5) {
+                     this.offG.setColor(Color.white);
+                  } else {
+                     this.offG.setColor(Color.black);
+                  }
+
+                  this.offG.fillRect(var2 * this.lanewidth + 42, 10 + this.vehicles[var2], 10, 10);
+                  this.offG.setColor(Color.gray);
+                  this.offG.drawLine(var2 * this.lanewidth + 40, 10, var2 * this.lanewidth + 40, 110);
+               }
+
+               this.offG.setColor(Color.blue);
+               this.offG.fillRect(this.playerx + this.pxdelta + (this.pxloc + 1) * this.lanewidth, this.playery + this.pydelta + this.pyloc * 10, 10, 10);
+               this.offG.setFont(this.regFont);
+               this.offG.setColor(Color.gray);
+               this.offG.drawString("Play a game while you wait! Try to get all the way across by using the ARROW keys!", 5, 130);
+               this.offG.drawString("Score:" + this.pwin, WIDTH - this.regFontMet.stringWidth("Score: " + this.pwin), 15);
+               if (this.ppaused) {
+                  var16 = "Click here to play wait-time game!";
+                  this.offG.setColor(Color.gray);
+                  this.offG.fillRect((WIDTH >> 1) - this.regFontMet.stringWidth(var16) / 2 - 10, 50, this.regFontMet.stringWidth(var16) + 20, 50);
+                  this.offG.setColor(Color.white);
+                  this.offG.setFont(this.regFont);
+                  this.offG.drawString(var16, (WIDTH >> 1) - this.regFontMet.stringWidth(var16) / 2, 80);
+               }
+            }
+         }
+
+         var1.drawImage(this.offImg, 0, 0, this);
+      } catch (Exception var15) {
+         this.state = 14;
+         this.runtimeError = true;
+         this.errorMsg = var15.getMessage();
+         System.out.println("Caught an exception: " + var15.getMessage());
+         var15.printStackTrace();
+         this.repaint();
+      }
+   }
+
+   public RoboBug() {
+      this.XTILES = XTILES1;
+      this.YTILES = YTILES1;
+      this.curyStart = this.YTILES - 4;
+      this.curyOff = this.YTILES - 4;
+      this.dir = 7;
+      this.pdir = 7;
+      this.charAnimRt = new int[]{3, 2, 1, 0};
+      this.charAnimLt = new int[]{4, 5, 6, 7};
+      this.charAnimUp = new int[]{8, 9, 10, 11};
+      this.charAnimDn = new int[]{11, 10, 9, 8};
+      this.charAnimIdleLt = new int[]{12, 13};
+      this.charAnimIdleRt = new int[]{14, 15};
+      this.charAnimJumpRt = new int[]{14, 15};
+      this.charAnimJumpLt = new int[]{12, 13};
+      this.hurting = false;
+      this.life = 100;
+      this.gottenLevels = false;
+      this.getSelectedLevel = false;
+      this.levelDone = false;
+      this.loadLevelSuccess = false;
+      this.levelError = false;
+      this.levelSuccess = false;
+      this.miniGameOn = false;
+      this.miniGameNum = 1;
+      this.vineticks1 = -1;
+      this.vineticks2 = -1;
+      this.vineticks3 = -1;
+      this.jumpery = 60;
+      this.jumperJumping = false;
+      this.jumperstuck = -1;
+      this.gotAcross = false;
+      this.playerx = 30;
+      this.playery = 10;
+      this.pxloc = -1;
+      this.pyloc = 4;
+      this.pmovedir = 3;
+      this.pmoving = false;
+      this.ppaused = true;
+      this.lanewidth = 15;
+      this.numlanes = 24;
+      this.g2init = false;
+      this.saveError = -1;
+      this.restoreError = -1;
+      this.mloadkey = new char[]{'t', 'h', 'e', 'w', 'o', 'r', 'l', 'd', ' '};
+      this.minvkey = new char[]{'t', 'i', 't', 'a', 'n', 'i', 'u', 'm', ' '};
+      this.invincible = false;
+      this.mcoinkey = new char[]{'n', 'e', 'u', 't', 'r', 'o', 'n', ' '};
+      this.mmapkey = new char[]{'q', 'u', 'a', 'r', 'k', ' '};
+      this.showmap = false;
+      this.creditStr = new String[]{"Disney Online Games Team:", "Lead Programmer:", "Andrew Forslund", "Lead Artist:", "Carrie Pittman", "Assistant Artist:", "Mike Hernandez", "Producer:", "Aaron Flores", "Integrator:", "Keith Goodman", "Sound Effects/Music:", "Keir Serrie", "QA Lead:", "Peter Sison", "QA Testers:", "Brian Adriano", "Original Game Concept:", "Andrew Forslund", "Level Design:", "Thomas Meigs", "", "Thanks to everybody who made this game possible!", "Names are listed in alphabetical order."};
+   }
+}
