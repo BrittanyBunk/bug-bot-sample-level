@@ -1,1 +1,3 @@
 This is an online game from about 1999 where it was on Disney's website as part of its blast club. I'm trying to recreate it - gemini AI has been helping me recreate it from the internet archive's files - which is where I got them (these aren't my own outside of my capabilities of assembling all of it together. Let's try to keep finding these files together - to recreate this and many other blast club java games too (this one's in java too - a rarity - as it's before flash!)).
+
+I put these files together to try to recreate this game - but I can't do it alone - because I don't have all of the files - so I leave it to the world to find them. Then we can put it altogether in one! Let's see how it goes.
